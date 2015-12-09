@@ -1,0 +1,14 @@
+doctype
+html
+  head
+    title CoreSpring Math Input
+    link(rel="stylesheet", href="index.css")
+    link(rel="stylesheet", href="/math-input/dist/corespring-math-input.css")
+    script(src="/math-input/bower_components/angular/angular.js")
+    script(src="/math-input/dist/corespring-math-input.js")
+    script(src="index.js")
+
+    block head
+
+  body(ng-app="app", ng-controller="Main")
+    != yield

@@ -4,7 +4,6 @@ angular.module('corespring.math-input')
     'MathInputDef',
     function(Controller, Def) {
 
-      // function template(config) {
       function template() {
         return [
           '<div class="math-input">',
@@ -19,12 +18,10 @@ angular.module('corespring.math-input')
       return {
         restrict: 'E',
         link: def.link,
-        require: 'ngModel',
         replace: true,
-        scope: {
-        },
-        controller: new Controller()
-
+        scope: {},
+        controller: new Controller(),
+        template: template()
       };
     }
   ]);

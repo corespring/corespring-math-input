@@ -1,5 +1,9 @@
 /*! corespring-math-input - v0.0.1 - 2015-12-09
 * Copyright (c) 2015 CoreSpring; Licensed MIT */
+angular.module('corespring.math-input', [
+
+]);
+
 angular.module('corespring.math-input')
   .factory('MathInputController', [
   function() {
@@ -45,7 +49,6 @@ angular.module('corespring.math-input')
     'MathInputDef',
     function(Controller, Def) {
 
-      // function template(config) {
       function template() {
         return [
           '<div class="math-input">',
@@ -60,12 +63,10 @@ angular.module('corespring.math-input')
       return {
         restrict: 'E',
         link: def.link,
-        require: 'ngModel',
         replace: true,
-        scope: {
-        },
-        controller: new Controller()
-
+        scope: {},
+        controller: new Controller(),
+        template: template()
       };
     }
   ]);

@@ -3,6 +3,29 @@ module.exports = function(grunt) {
 
   var failOnJsHintErrors = grunt.option('failOnJsHintErrors') === true;
 
+  function startExpress() {
+    var express = require('express');
+    var app = express();
+    app.use(express.static(__dirname));
+    var harp = require('harp');
+    app.use('/math-input/dist', express.static(__dirname + '/dist'));
+    app.use('/math-input/bower_components', express.static(__dirname + '/bower_components'));
+    app.use('/math-input', express.static(__dirname + '/site'));
+    app.use('/math-input', harp.mount(__dirname + '/site'));
+    //app.use(require('connect-livereload')());
+
+    app.get('/', function (req, res) {
+      res.send('Hello World!');
+    });
+
+    var server = app.listen(3000, function () {
+      var host = server.address().address;
+      var port = server.address().port;
+
+      console.log('Example app listening at http://%s:%s', host, port);
+    });
+  }
+
   // Project configuration.
   var config = {
     // Metadata.
@@ -46,7 +69,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>'
       },
       dist: {
-        src: ['src/js/**/*.js'],
+        src: ['src/js/**/_declaration.js', 'src/js/**/*.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -62,6 +85,23 @@ module.exports = function(grunt) {
         }
       }
     },
+
+    watch: {
+      js: {
+        files: ['src/js/**/*.js'],
+        tasks: ['js']
+      },
+      css: {
+        files: ['src/css/**/*.less'],
+        tasks: ['css']
+      }
+    },
+
+    open: {
+      index: {
+        path: 'http://localhost:3000/math-input/index.html'
+      }
+    }
   };
 
   grunt.initConfig(config);
@@ -72,7 +112,9 @@ module.exports = function(grunt) {
     'grunt-contrib-less',
     'grunt-contrib-jshint',
     'grunt-contrib-concat',
-    'grunt-contrib-uglify'
+    'grunt-contrib-uglify',
+    'grunt-contrib-watch',
+    'grunt-open'
   ];
 
   npmTasks.forEach(grunt.loadNpmTasks);
@@ -82,5 +124,9 @@ module.exports = function(grunt) {
   grunt.registerTask('build', ['js', 'css']);
   grunt.registerTask('css', ['clean:css', 'less']);
   grunt.registerTask('js', ['clean:js', 'jshint', 'concat', 'uglify']);
+  grunt.registerTask('run', ['js', 'css', 'start-express', 'open', 'watch']);
+  //grunt.registerTask('run-site-only', ['start-express', 'express-keepalive']);
+  grunt.registerTask('start-express', startExpress);
+  //grunt.registerTask('test', ['karma:once']);
 
 };
