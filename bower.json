@@ -1,0 +1,18 @@
+{
+  "name": "corespring-math-input",
+  "description": "Angular math enabled input",
+  "main": [
+    "dist/corespring-math-input.js",
+    "dist/corespring-math-input.css"
+  ],
+  "moduleType": [],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

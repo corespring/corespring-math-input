@@ -1,0 +1,16 @@
+{
+  "name": "corespring-math-input",
+  "author": "CoreSpring",
+  "version": "0.0.1",
+  "description": "Angular math enabled input",
+  "license": "MIT",
+  "devDependencies": {
+    "bower": "^1.7.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-clean": "^0.7.0",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-less": "^1.1.0",
+    "grunt-contrib-uglify": "^0.11.0"
+  }
+}
