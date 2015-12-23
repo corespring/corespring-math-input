@@ -35,6 +35,7 @@
       background-color: #131F85;
       padding: 0;
       color: white;
+      outline:none;
 
       &:hover {
         background-color: #e6ac00;
@@ -45,10 +46,18 @@
       }
     }
 
+    .numeric-section, .basic-section {
+      float: left;
+    }
+
     .cursor-section {
       width: 100%;
       height: 30px;
       margin-bottom: 2px;
+
+      .button {
+        font-size: 14px;
+      }
     }
 
     .numeric-section {
@@ -66,6 +75,10 @@
           background-color: #cc9900;
         }
       }
+    }
+
+    .basic-section {
+      width: 30px;
     }
   }
 }
