@@ -40,7 +40,8 @@ module.exports = function(grunt) {
     // Task configuration.
     clean: {
       css: ['dist/*.css'],
-      js: ['dist/*.js']
+      js: ['dist/*.js'],
+      mathquill: ['dist/mathquill']
     },
 
     less: {
@@ -60,7 +61,7 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc',
         force: !failOnJsHintErrors
       },
-      main: ['src/js/**/*.js']
+      main: ['Gruntfile.js','src/js/**/*.js']
     },
 
     concat: {
@@ -84,6 +85,23 @@ module.exports = function(grunt) {
           'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
         }
       }
+    },
+
+    exec: {
+      'make-mathquill': {
+          cmd: 'make -C bower_components/mathquill'
+      }
+    },
+
+    copy: {
+      mathquill: {
+        files: [{
+          expand: true,
+          cwd: 'bower_components/mathquill/build/',
+          src: ['**'],
+          dest: 'dist/mathquill/'
+        }]
+      },
     },
 
     watch: {
@@ -113,7 +131,9 @@ module.exports = function(grunt) {
     'grunt-contrib-jshint',
     'grunt-contrib-concat',
     'grunt-contrib-uglify',
+    'grunt-contrib-copy',
     'grunt-contrib-watch',
+    'grunt-exec',
     'grunt-open'
   ];
 
@@ -121,12 +141,12 @@ module.exports = function(grunt) {
 
   // Custom tasks.
   grunt.registerTask('default', ['build']);
-  grunt.registerTask('build', ['js', 'css']);
+  grunt.registerTask('build', ['js', 'css', 'mathquill']);
   grunt.registerTask('css', ['clean:css', 'less']);
   grunt.registerTask('js', ['clean:js', 'jshint', 'concat', 'uglify']);
-  grunt.registerTask('run', ['js', 'css', 'start-express', 'open', 'watch']);
+  grunt.registerTask('mathquill', ['clean:mathquill', 'exec:make-mathquill', 'copy:mathquill']);
+  grunt.registerTask('run', ['build', 'start-express', 'open', 'watch']);
   //grunt.registerTask('run-site-only', ['start-express', 'express-keepalive']);
   grunt.registerTask('start-express', startExpress);
   //grunt.registerTask('test', ['karma:once']);
-
 };

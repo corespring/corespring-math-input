@@ -7,7 +7,10 @@ angular.module('corespring.math-input')
       function template() {
         return [
           '<div class="math-input">',
-          '  Math Input',
+          '  <div class="input" ng-class="{ \'dotted\': dotted }">',
+          '    <span ng-class="editable ? \'mathquill-editable\' : \'mathquill-embedded-latex\'">{{expression}}</span>',
+          '  </div>',
+          '  <keypad ng-show="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
           '</div>'
 
         ].join('\n');
@@ -19,9 +22,12 @@ angular.module('corespring.math-input')
         restrict: 'E',
         link: def.link,
         replace: true,
-        scope: {},
-        controller: new Controller(),
-        template: template()
+        scope: {
+          expression: '=',
+          editable: '=',
+          dotted: '=',
+          keypadType: '='
+        }
       };
     }
   ]);

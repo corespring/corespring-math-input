@@ -5,9 +5,9 @@ angular.module('corespring.math-input')
 
     return function controller() {
 
-      return function() {
-      // return function($scope) {
+      return function($scope) {
 
+        // TODO: Move logic here
         // this.inputChanged = function($element) {
         //   $scope.inputChanged($element);
         // };
