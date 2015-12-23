@@ -52,20 +52,15 @@ angular.module('corespring.math-input')
               var button = $scope.buttons[action];
               log('Clicked button: ' + action);
 
-              switch(button.logic) {
-                case 'cursor':
-                  clickCursor(action);
-                  break;
-                case 'cmd':
-                  clickCmd(button.symbol);
-                  break;
-                default:
-                  log('Not supported: ' + action);
+              if(button.logic === 'cursor' || button.logic === 'cmd') {
+                $scope.focusedInput.mathquill(button.logic, button.command);
+              } else {
+                log('Not supported. [ Logic: ' + button.logic + ', Action: ' + action + ']');
               }
             };
 
             function clickCursor(action) {
-              $scope.focusedInput.mathquill('cursor', action);
+
             }
 
             function clickCmd(action) {

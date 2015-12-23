@@ -12,7 +12,7 @@ angular.module('corespring.math-input')
           '            class="button {{buttons[button].cssClass}}"',
           '            title="{{buttons[button].name}}"',
           '            ng-click="onClick(button)">',
-          '            {{buttons[button].symbol}}</button>',
+          '            <div ng-bind-html="buttons[button].symbol"></div></button>',
           '  </div>',
           '</div>'
         ].join('\n');
