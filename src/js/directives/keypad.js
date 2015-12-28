@@ -11,6 +11,7 @@ angular.module('corespring.math-input')
           '            id="{{button}}-button"',
           '            class="button {{buttons[button].cssClass}}"',
           '            title="{{buttons[button].name}}"',
+          '            ng-disabled="buttons[button].disabled"',
           '            ng-click="onClick(button)">',
           '            <div ng-bind-html="buttons[button].symbol"></div></button>',
           '  </div>',
