@@ -3877,22 +3877,8 @@ jQuery.fn.mathquill = function(cmd, latex) {
           cursor = block && block.cursor;
 
         if (cursor) {
-          switch (latex) {
-            case 'left':
-              cursor.moveLeft();
-              break;
-            case 'right':
-              cursor.moveRight();
-              break;
-            case 'up':
-              cursor.moveUp();
-              break;
-            case 'down':
-              cursor.moveDown();
-              break;
-            case 'backspace':
-              cursor.backspace();
-              break;
+          if(latex in cursor && typeof cursor[latex] === 'function') {
+            cursor[latex]();
           }
         }
       });
