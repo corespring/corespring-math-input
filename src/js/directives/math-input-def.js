@@ -4,16 +4,17 @@ angular.module('corespring.math-input')
     '$log',
     '$compile',
     '$document',
-    function(MathInputConfig, $log, $compile, $document){
+    '$timeout',
+    function(MathInputConfig, $log, $compile, $document, $timeout) {
 
       var log = $log.debug.bind($log, '[math-input-def]');
 
-      function MathInputDefinition(template, link){
+      function MathInputDefinition(template, link) {
 
         this.link = function($scope, $element, $attrs) {
           new MathInputConfig().postLink($scope);
 
-          function initDom(el, attrs){
+          function initDom(el, attrs) {
             var node = $(template());
             var $node = $(node);
 
@@ -27,19 +28,19 @@ angular.module('corespring.math-input')
 
           function initMethods() {
 
-            $element.on('focus', '.mathquill-editable', function(event){
-              if($scope.showKeypad === false) {
+            $element.on('focus', '.mathquill-editable', function(event) {
+              if ($scope.showKeypad === false) {
                 $document.mousedown();
               }
 
               $scope.showKeypad = true;
               $scope.focusedInput = $(this);
 
-              $scope.$apply(function(){
+              $scope.$apply(function() {
                 // add mousedown event to close the keypad
-                $document.on('mousedown', function (event) {
-                  $scope.$apply(function(){
-                    if(!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
+                $document.on('mousedown', function(event) {
+                  $scope.$apply(function() {
+                    if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
                       $scope.showKeypad = false;
                       $document.off('mousedown');
                     }
@@ -52,8 +53,11 @@ angular.module('corespring.math-input')
               var button = $scope.buttons[action];
               log('Clicked button: ' + action);
 
-              if(button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
+              if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
                 $scope.focusedInput.mathquill(button.logic, button.command);
+                $timeout(function() {
+                  $scope.focusedInput.find('textarea').focus();
+                }, 1);
               } else {
                 log('Not supported. [ Logic: ' + button.logic + ', Action: ' + action + ']');
               }
