@@ -53,7 +53,13 @@ angular.module('corespring.math-input')
               var button = $scope.buttons[action];
               log('Clicked button: ' + action);
 
-              if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
+              if (button.logic === 'clear') {
+                $scope.focusedInput.mathquill('latex','');
+                $timeout(function() {
+                  $scope.focusedInput.find('textarea').focus();
+                }, 1);
+
+              } else if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
                 $scope.focusedInput.mathquill(button.logic, button.command);
                 $timeout(function() {
                   $scope.focusedInput.find('textarea').focus();

@@ -6,14 +6,18 @@ angular.module('corespring.math-input')
       function template() {
         return [
           '<div class="keypad" ng-class="keypadType">',
+
+          '<div style="width: 20px; height: 20px" ng-bind-html="graphics.rest.absolute"></div>',
+
+
           '  <div class="{{ sections[section].code }}-section" ng-repeat="section in types[keypadType].sections">',
-          '    <button ng-repeat="button in sections[section].buttons" ',
+          '    <div ng-repeat="button in sections[section].buttons" ',
           '            id="{{button}}-button"',
           '            class="button {{buttons[button].cssClass}}"',
           '            title="{{buttons[button].name}}"',
           '            ng-disabled="buttons[button].disabled"',
-          '            ng-click="onClick(button)">',
-          '            <div ng-bind-html="buttons[button].symbol"></div></button>',
+          '            keypad-button="" keypad-button-graphics="graphics" keypad-button-button="button" keypad-button-click="onClick(button)" ',
+          '    </div>',
           '  </div>',
           '</div>'
         ].join('\n');

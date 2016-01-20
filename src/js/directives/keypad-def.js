@@ -28,6 +28,8 @@ angular.module('corespring.math-input')
             $compile($node)($scope);
 
             initMethods();
+
+            $scope.state = 'rest';
           }
 
           init();

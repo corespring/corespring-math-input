@@ -20,7 +20,8 @@
       margin: 0;
       border: 2px solid #666666;
       border-radius: 5px;
-      background-color: #A8A8A8;
+      background-color: #F8F6F6;
+      //background-color: white;
       color: #FFFFFF;
       font-family: 'Montserrat', sans-serif;
       font-size: 14px;
@@ -29,62 +30,65 @@
     }
 
     .button {
+      display: inline-block;
       border: none;
       height: 30px;
       width: 30px;
-      background-color: #131F85;
       padding: 0;
       color: white;
       outline:none;
+      margin-right: 5px;
 
       &:hover {
-        background-color: #e6ac00;
       }
 
       &:active {
-        background-color: #cc9900;
       }
     }
 
-    .numeric-section, .basic-section, .advanced-section {
-      float: left;
+    .numeric-section, .basic-section, .advanced-section, .clear-section {
+      display: inline-block;
+    }
+
+    .clear-section {
+      width: 140px;
+      text-align: right;
     }
 
     .cursor-section {
-      width: 100%;
-      height: 30px;
-      margin-bottom: 2px;
+      width: 290px;
+      margin-bottom: 7px;
+      border-bottom: 1px solid #999;
 
       .button {
         font-size: 14px;
       }
+      .backspace {
+        margin-left: 72px;
+      }
     }
 
     .numeric-section {
-      width: 90px;
+      width: 140px;
       margin-right: 2px;
       margin-bottom: 2px;
-
       .number {
-        background-color: #424C9D;
         &:hover {
-          background-color: #e6ac00;
         }
 
         &:active {
-          background-color: #cc9900;
         }
       }
     }
 
     .basic-section {
-      width: 30px;
+      width: 80px;
       margin-right: 2px;
       margin-bottom: 2px;
     }
 
     .advanced-section {
-      width: 120px;
+      width: 140px;
     }
   }
 }
