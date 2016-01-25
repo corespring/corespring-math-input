@@ -26,35 +26,43 @@ angular.module('corespring.math-input')
             return $node;
           }
 
-          function initMethods() {
-
-            $element.on('focus', '.mathquill-editable', function(event) {
-              if ($scope.showKeypad === false) {
-                $document.mousedown();
-              }
-
-              $scope.showKeypad = true;
-              $scope.focusedInput = $(this);
-
-              $scope.$apply(function() {
-                // add mousedown event to close the keypad
-                $document.on('mousedown', function(event) {
-                  $scope.$apply(function() {
-                    if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
-                      $scope.showKeypad = false;
-                      $document.off('mousedown');
-                    }
-                  });
+          function onInputFieldClick() {
+            $scope.showKeypad = $scope.editable === 'true';
+            $scope.focusedInput = $(this);
+            $document.on('mousedown', function(event) {
+              if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
+                $scope.$apply(function() {
+                  $scope.showKeypad = false;
                 });
-              });
+                $document.off('mousedown');
+              }
             });
+            $scope.$apply();
+          }
+
+          function onInputChange() {
+            $scope.ngModel = $element.find('.mq').mathquill('latex');
+            $scope.$apply();
+          }
+
+          function initMethods() {
+            var mqElement = $element.find('.mq');
+            mqElement.click(onInputFieldClick);
+            $element.bind('input propertychange', onInputChange);
+
+            mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
+            if ($scope.expression) {
+              mqElement.mathquill('latex', $scope.expression);
+              $scope.ngModel = $scope.expression;
+              mqElement.blur();
+            } else {
+              $scope.ngModel = '';
+            }
 
             $scope.clickButton = function(action) {
               var button = $scope.buttons[action];
-              log('Clicked button: ' + action);
-
               if (button.logic === 'clear') {
-                $scope.focusedInput.mathquill('latex','');
+                $scope.focusedInput.mathquill('latex', '');
                 $timeout(function() {
                   $scope.focusedInput.find('textarea').focus();
                 }, 1);
@@ -64,16 +72,14 @@ angular.module('corespring.math-input')
                 $timeout(function() {
                   $scope.focusedInput.find('textarea').focus();
                 }, 1);
-              } else {
-                log('Not supported. [ Logic: ' + button.logic + ', Action: ' + action + ']');
               }
+
+              $scope.ngModel = $element.find('.mq').mathquill('latex');
             };
           }
 
           function init() {
-
             log('Math input init...');
-
             $scope.showKeypad = false;
             $scope.focusedInput = null;
 
