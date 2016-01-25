@@ -1,27 +1,9 @@
-/*! corespring-math-input - v0.0.1 - 2016-01-21
+/*! corespring-math-input - v0.0.1 - 2016-01-25
 * Copyright (c) 2016 CoreSpring; Licensed MIT */
 angular.module('corespring.math-input', [
 
 ]);
 
-angular.module('corespring.math-input')
-  .factory('MathInputController', [
-  function() {
-
-
-    return function controller() {
-
-      return function($scope) {
-
-        // TODO: Move logic here
-        // this.inputChanged = function($element) {
-        //   $scope.inputChanged($element);
-        // };
-
-      };
-    };
-  }
-]);
 angular.module('corespring.math-input')
   .directive('keypadButton', [
     function() {
@@ -114,14 +96,16 @@ angular.module('corespring.math-input')
       function template() {
         return [
           '<div class="keypad" ng-class="keypadType">',
-
-          '  <div class="{{ sections[section].code }}-section" ng-repeat="section in types[keypadType].sections">',
+          '  <div class="{{sections[section].code}}-section" ng-repeat="section in types[keypadType].sections">',
           '    <div ng-repeat="button in sections[section].buttons" ',
           '            id="{{button}}-button"',
           '            class="button {{buttons[button].cssClass}}"',
           '            title="{{buttons[button].name}}"',
           '            ng-disabled="buttons[button].disabled"',
-          '            keypad-button="" keypad-button-graphics="graphics" keypad-button-button="button" keypad-button-click="onClick(button)" ',
+          '            keypad-button=""',
+          '            keypad-button-graphics="graphics"',
+          '            keypad-button-button="button"',
+          '            keypad-button-click="onClick(button)"',
           '    </div>',
           '  </div>',
           '</div>'
@@ -143,6 +127,139 @@ angular.module('corespring.math-input')
     }
   ]);
 angular.module('corespring.math-input')
+  .factory('MathInputDef', [
+    'MathInputConfig',
+    '$log',
+    '$compile',
+    '$document',
+    '$timeout',
+    function(MathInputConfig, $log, $compile, $document, $timeout) {
+
+      var log = $log.debug.bind($log, '[math-input-def]');
+
+      function MathInputDefinition(template, link) {
+
+        this.link = function($scope, $element, $attrs) {
+          new MathInputConfig().postLink($scope);
+
+          function initDom(el, attrs) {
+            var node = $(template());
+            var $node = $(node);
+
+            // set id for directive instance
+            $scope.instanceId = Math.random().toString(36).substring(7);
+            $node.attr('id', $scope.instanceId);
+            log('Instance ID: ' + $scope.instanceId);
+
+            return $node;
+          }
+
+          function onInputFieldClick() {
+            $scope.showKeypad = $scope.editable === 'true';
+            $scope.focusedInput = $(this);
+            $document.on('mousedown', function(event) {
+              if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
+                $scope.$apply(function() {
+                  $scope.showKeypad = false;
+                });
+                $document.off('mousedown');
+              }
+            });
+            $scope.$apply();
+          }
+
+          function onInputChange() {
+            $scope.ngModel = $element.find('.mq').mathquill('latex');
+            $scope.$apply();
+          }
+
+          function initMethods() {
+            var mqElement = $element.find('.mq');
+            mqElement.click(onInputFieldClick);
+            $element.bind('input propertychange', onInputChange);
+
+            mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
+            if ($scope.expression) {
+              mqElement.mathquill('latex', $scope.expression);
+              $scope.ngModel = $scope.expression;
+              mqElement.blur();
+            } else {
+              $scope.ngModel = '';
+            }
+
+            $scope.clickButton = function(action) {
+              var button = $scope.buttons[action];
+              if (button.logic === 'clear') {
+                $scope.focusedInput.mathquill('latex', '');
+                $timeout(function() {
+                  $scope.focusedInput.find('textarea').focus();
+                }, 1);
+
+              } else if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
+                $scope.focusedInput.mathquill(button.logic, button.command);
+                $timeout(function() {
+                  $scope.focusedInput.find('textarea').focus();
+                }, 1);
+              }
+
+              $scope.ngModel = $element.find('.mq').mathquill('latex');
+            };
+          }
+
+          function init() {
+            log('Math input init...');
+            $scope.showKeypad = false;
+            $scope.focusedInput = null;
+
+            var $node = initDom($element, $attrs);
+            $element.html($node);
+            $compile($node)($scope);
+
+            initMethods();
+          }
+
+          init();
+        };
+      }
+
+      return MathInputDefinition;
+    }
+  ]);
+
+angular.module('corespring.math-input')
+  .directive('mathInput', [
+    'MathInputDef',
+    function(Def) {
+
+      function template() {
+        return [
+          '<div class="math-input">',
+          '  <div class="input" ng-class="{ \'dotted\': dotted }">',
+          '    <span class="mq"></span>',
+          '  </div>',
+          '  <keypad ng-show="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
+          '</div>'
+
+        ].join('\n');
+      }
+
+      var def = new Def(template);
+
+      return {
+        restrict: 'E',
+        link: def.link,
+        replace: true,
+        scope: {
+          expression: '=',
+          dotted: '=',
+          editable: '@',
+          keypadType: '=',
+          ngModel: '='
+        }
+      };
+    }
+  ]);
+angular.module('corespring.math-input')
   .factory('MathInputConfig', [
     '$sce',
     function($sce) {
@@ -153,7 +270,7 @@ angular.module('corespring.math-input')
 
       buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'moveLeft', shortcut: '', cssClass: 'cursor' };
       buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'moveRight', shortcut: '', cssClass: 'cursor' };
-      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: '', shortcut: 'moveUp', cssClass: 'cursor' };
+      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'moveUp', shortcut: '', cssClass: 'cursor' };
       buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'moveDown', shortcut: '', cssClass: 'cursor' };
       buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'backspace', shortcut: '', cssClass: 'backspace' };
       // Numeric section
@@ -177,12 +294,12 @@ angular.module('corespring.math-input')
       buttons.divide = { id: 'divide', name: 'Divide', symbol: $sce.trustAsHtml('&#247'), logic: 'cmd', command: '\\div', shortcut: '', cssClass: 'basic-operation' };
       // Root section
       buttons.sqrt = { id: 'sqrt', name: 'Square root', symbol: $sce.trustAsHtml('&#8730'), logic: 'cmd', command: '\\sqrt', shortcut: '', cssClass: 'root' };
-      buttons.root = { id: 'root', name: 'Root', symbol: $sce.trustAsHtml('n&#8730'), logic: 'write', command: '\\sqrt[{}]{}', shortcut: '', cssClass: 'root' };
+      buttons.root = { id: 'root', name: 'Nth root', symbol: $sce.trustAsHtml('n&#8730'), logic: 'write', command: '\\sqrt[{}]{}', shortcut: '', cssClass: 'root' };
       // Fraction section
       buttons.fraction = { id: 'fraction', name: 'Fraction', symbol: $sce.trustAsHtml('x/n'), logic: 'cmd', command: '\\frac', shortcut: '', cssClass: 'fraction' };
       // Subscript/Superscript section
       buttons.subscript = { id: 'subscript', name: 'Subscript', symbol: $sce.trustAsHtml('x_n'), logic: 'cmd', command: '_', shortcut: '', cssClass: 'sub-sup' }; //<sub>n</sub>
-      buttons.superscript = { id: 'superscript', name: 'Superscript', symbol: $sce.trustAsHtml('x^n'), logic: 'cmd', command: '^', shortcut: '', cssClass: 'sub-sup' };//<sup>n</sup>
+      buttons.superscript = { id: 'superscript', name: 'Exponent', symbol: $sce.trustAsHtml('x^n'), logic: 'cmd', command: '^', shortcut: '', cssClass: 'sub-sup' };//<sup>n</sup>
       // Vars section
       buttons.x = { id: 'x', name: 'X', symbol: $sce.trustAsHtml('x'), logic: 'cmd', command: 'x', shortcut: '', cssClass: 'vars' }; //<sub>n</sub>
       buttons.y = { id: 'y', name: 'Y', symbol: $sce.trustAsHtml('y'), logic: 'cmd', command: 'y', shortcut: '', cssClass: 'vars' };//<sup>n</sup>
@@ -329,132 +446,5 @@ angular.module('corespring.math-input')
       }
 
       return MathInputConfig;
-    }
-  ]);
-angular.module('corespring.math-input')
-  .factory('MathInputDef', [
-    'MathInputConfig',
-    '$log',
-    '$compile',
-    '$document',
-    '$timeout',
-    function(MathInputConfig, $log, $compile, $document, $timeout) {
-
-      var log = $log.debug.bind($log, '[math-input-def]');
-
-      function MathInputDefinition(template, link) {
-
-        this.link = function($scope, $element, $attrs) {
-          new MathInputConfig().postLink($scope);
-
-          function initDom(el, attrs) {
-            var node = $(template());
-            var $node = $(node);
-
-            // set id for directive instance
-            $scope.instanceId = Math.random().toString(36).substring(7);
-            $node.attr('id', $scope.instanceId);
-            log('Instance ID: ' + $scope.instanceId);
-
-            return $node;
-          }
-
-          function initMethods() {
-
-            $element.on('focus', '.mathquill-editable', function(event) {
-              if ($scope.showKeypad === false) {
-                $document.mousedown();
-              }
-
-              $scope.showKeypad = true;
-              $scope.focusedInput = $(this);
-
-              $scope.$apply(function() {
-                // add mousedown event to close the keypad
-                $document.on('mousedown', function(event) {
-                  $scope.$apply(function() {
-                    if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
-                      $scope.showKeypad = false;
-                      $document.off('mousedown');
-                    }
-                  });
-                });
-              });
-            });
-
-            $scope.clickButton = function(action) {
-              var button = $scope.buttons[action];
-              log('Clicked button: ' + action);
-
-              if (button.logic === 'clear') {
-                $scope.focusedInput.mathquill('latex','');
-                $timeout(function() {
-                  $scope.focusedInput.find('textarea').focus();
-                }, 1);
-
-              } else if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
-                $scope.focusedInput.mathquill(button.logic, button.command);
-                $timeout(function() {
-                  $scope.focusedInput.find('textarea').focus();
-                }, 1);
-              } else {
-                log('Not supported. [ Logic: ' + button.logic + ', Action: ' + action + ']');
-              }
-            };
-          }
-
-          function init() {
-
-            log('Math input init...');
-
-            $scope.showKeypad = false;
-            $scope.focusedInput = null;
-
-            var $node = initDom($element, $attrs);
-            $element.html($node);
-            $compile($node)($scope);
-
-            initMethods();
-          }
-
-          init();
-        };
-      }
-
-      return MathInputDefinition;
-    }
-  ]);
-
-angular.module('corespring.math-input')
-  .directive('mathInput', [
-    'MathInputController',
-    'MathInputDef',
-    function(Controller, Def) {
-
-      function template() {
-        return [
-          '<div class="math-input">',
-          '  <div class="input" ng-class="{ \'dotted\': dotted }">',
-          '    <span ng-class="editable ? \'mathquill-editable\' : \'mathquill-embedded-latex\'">{{expression}}</span>',
-          '  </div>',
-          '  <keypad ng-show="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
-          '</div>'
-
-        ].join('\n');
-      }
-
-      var def = new Def(template);
-
-      return {
-        restrict: 'E',
-        link: def.link,
-        replace: true,
-        scope: {
-          expression: '=',
-          editable: '=',
-          dotted: '=',
-          keypadType: '='
-        }
-      };
     }
   ]);
