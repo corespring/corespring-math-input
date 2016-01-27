@@ -43,9 +43,10 @@ angular.module('corespring.math-input')
 
           function onInputChange(skipApply) {
             var latex = $element.find('.mq').mathquill('latex');
-            console.log("Cinober",latex);
             $scope.ngModel = fixBackslashes(latex);
-            !skipApply && $scope.$apply();
+            if (!skipApply) {
+              $scope.$apply();
+            }
           }
 
 
