@@ -8,3 +8,4 @@ tmp
 .DS_Store
 *.gz
 npm-debug.log
+min/
