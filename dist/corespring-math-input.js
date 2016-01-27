@@ -1,4 +1,4 @@
-/*! corespring-math-input - v0.0.1 - 2016-01-25
+/*! corespring-math-input - v0.0.1 - 2016-01-27
 * Copyright (c) 2016 CoreSpring; Licensed MIT */
 angular.module('corespring.math-input', [
 
@@ -12,16 +12,15 @@ angular.module('corespring.math-input')
       return {
         restrict: 'AE',
         scope: {
-          click: "&keypadButtonClick",
-          graphics: "=keypadButtonGraphics",
-          button: "=keypadButtonButton"
+          click: '&keypadButtonClick',
+          graphics: '=keypadButtonGraphics',
+          button: '=keypadButtonButton'
         },
         template: '<div style="width: 28px; height: 28px" ng-bind-html="graphics[state][button]"></div>',
         link: function($scope, $element) {
 
           $scope.state = 'rest';
           $element.mousedown(function($event) {
-            console.log("LI");
             $event.preventDefault();
             $event.stopPropagation();
             $scope.$apply(function() {
@@ -30,7 +29,7 @@ angular.module('corespring.math-input')
           });
           $element.mouseup(function($event) {
             $event.preventDefault();
-            $event.stopPropagation()
+            $event.stopPropagation();
             $scope.$apply(function() {
               $scope.state = 'rest';
               $scope.click();
@@ -158,30 +157,41 @@ angular.module('corespring.math-input')
             $scope.showKeypad = $scope.editable === 'true';
             $scope.focusedInput = $(this);
             $document.on('mousedown', function(event) {
-              if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
-                $scope.$apply(function() {
-                  $scope.showKeypad = false;
-                });
-                $document.off('mousedown');
-              }
+              $scope.$apply(function() {
+                $scope.showKeypad = false;
+              });
+              $document.off('mousedown');
             });
             $scope.$apply();
           }
-
-          function onInputChange() {
-            $scope.ngModel = $element.find('.mq').mathquill('latex');
-            $scope.$apply();
+          function fixBackslashes(expression) {
+            return expression.replace(/\\/g, '\\\\');
           }
+
+          function onInputChange(skipApply) {
+            var latex = $element.find('.mq').mathquill('latex');
+            $scope.ngModel = fixBackslashes(latex);
+            if (!skipApply) {
+              $scope.$apply();
+            }
+          }
+
 
           function initMethods() {
             var mqElement = $element.find('.mq');
             mqElement.click(onInputFieldClick);
             $element.bind('input propertychange', onInputChange);
+            $element.bind('keyup', function(ev) {
+              // input propertychange does not fire for backspace, need to handle separately
+              if (ev.keyCode === 8) {
+                onInputChange();
+              }
+            });
 
             mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
             if ($scope.expression) {
               mqElement.mathquill('latex', $scope.expression);
-              $scope.ngModel = $scope.expression;
+              $scope.ngModel = fixBackslashes($scope.expression);
               mqElement.blur();
             } else {
               $scope.ngModel = '';
@@ -202,7 +212,7 @@ angular.module('corespring.math-input')
                 }, 1);
               }
 
-              $scope.ngModel = $element.find('.mq').mathquill('latex');
+              onInputChange(true);
             };
           }
 
