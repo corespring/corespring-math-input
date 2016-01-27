@@ -141,7 +141,7 @@ module.exports = function(grunt) {
 
   // Custom tasks.
   grunt.registerTask('default', ['build']);
-  grunt.registerTask('build', ['js', 'css', 'mathquill']);
+  grunt.registerTask('build', ['js', 'css']);
   grunt.registerTask('css', ['clean:css', 'less']);
   grunt.registerTask('js', ['clean:js', 'jshint', 'concat', 'uglify']);
   grunt.registerTask('mathquill', ['clean:mathquill', 'exec:make-mathquill', 'copy:mathquill']);
