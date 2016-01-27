@@ -30,30 +30,40 @@ angular.module('corespring.math-input')
             $scope.showKeypad = $scope.editable === 'true';
             $scope.focusedInput = $(this);
             $document.on('mousedown', function(event) {
-              if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
-                $scope.$apply(function() {
-                  $scope.showKeypad = false;
-                });
-                $document.off('mousedown');
-              }
+              $scope.$apply(function() {
+                $scope.showKeypad = false;
+              });
+              $document.off('mousedown');
             });
             $scope.$apply();
           }
-
-          function onInputChange() {
-            $scope.ngModel = $element.find('.mq').mathquill('latex');
-            $scope.$apply();
+          function fixBackslashes(expression) {
+            return expression.replace(/\\/g, '\\\\');
           }
+
+          function onInputChange(skipApply) {
+            var latex = $element.find('.mq').mathquill('latex');
+            console.log("Cinober",latex);
+            $scope.ngModel = fixBackslashes(latex);
+            !skipApply && $scope.$apply();
+          }
+
 
           function initMethods() {
             var mqElement = $element.find('.mq');
             mqElement.click(onInputFieldClick);
             $element.bind('input propertychange', onInputChange);
+            $element.bind('keyup', function(ev) {
+              // input propertychange does not fire for backspace, need to handle separately
+              if (ev.keyCode === 8) {
+                onInputChange();
+              }
+            });
 
             mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
             if ($scope.expression) {
               mqElement.mathquill('latex', $scope.expression);
-              $scope.ngModel = $scope.expression;
+              $scope.ngModel = fixBackslashes($scope.expression);
               mqElement.blur();
             } else {
               $scope.ngModel = '';
@@ -74,7 +84,7 @@ angular.module('corespring.math-input')
                 }, 1);
               }
 
-              $scope.ngModel = $element.find('.mq').mathquill('latex');
+              onInputChange(true);
             };
           }
 
