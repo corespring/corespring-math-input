@@ -56,6 +56,18 @@ module.exports = function(grunt) {
       }
     },
 
+    karma: {
+      once: {
+        configFile: 'karma.conf.js',
+        singleRun: true
+      },
+      continuous: {
+        configFile: 'karma.conf.js',
+        singleRun: false,
+        autoWatch: true
+      }
+    },
+
     jshint: {
       options: {
         jshintrc: '.jshintrc',
@@ -133,6 +145,7 @@ module.exports = function(grunt) {
     'grunt-contrib-uglify',
     'grunt-contrib-copy',
     'grunt-contrib-watch',
+    'grunt-karma',
     'grunt-exec',
     'grunt-open'
   ];
@@ -148,5 +161,5 @@ module.exports = function(grunt) {
   grunt.registerTask('run', ['build', 'start-express', 'open', 'watch']);
   //grunt.registerTask('run-site-only', ['start-express', 'express-keepalive']);
   grunt.registerTask('start-express', startExpress);
-  //grunt.registerTask('test', ['karma:once']);
+  grunt.registerTask('test', ['karma:once']);
 };
