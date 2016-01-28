@@ -6,23 +6,18 @@ describe('math input', function() {
 
     beforeEach(module('corespring.math-input'));
 
-    function createDirective(opts) {
+    function createDirective() {
       return inject(function($compile, $rootScope) {
-        var s = $rootScope.$new();
+        scope = $rootScope.$new();
         var node = angular.element([
           '<keypad-button keypad-button-click="click()">',
           '</keypad-button>'
         ].join('\n'));
-        element = $compile(node)(s);
-        scope = s;
-
-        s.click = jasmine.createSpy('click');
-
-        s.$digest();
+        element = $compile(node)(scope);
+        scope.click = jasmine.createSpy('click');
         directiveScope = element.isolateScope();
       });
     }
-
 
     describe('init', function() {
       beforeEach(createDirective());
@@ -51,9 +46,6 @@ describe('math input', function() {
         expect(scope.click).toHaveBeenCalled();
         expect(directiveScope.state).toBe('rest');
       });
-
     });
-
-
   });
 });

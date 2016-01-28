@@ -1,21 +1,18 @@
 angular.module('corespring.math-input')
   .directive('keypadButton', [
     function() {
-
-
       return {
         restrict: 'AE',
         scope: {
-          click: "&keypadButtonClick",
-          graphics: "=keypadButtonGraphics",
-          button: "=keypadButtonButton"
+          click: '&keypadButtonClick',
+          graphics: '=keypadButtonGraphics',
+          button: '=keypadButtonButton'
         },
         template: '<div style="width: 28px; height: 28px" ng-bind-html="graphics[state][button]"></div>',
         link: function($scope, $element) {
 
           $scope.state = 'rest';
           $element.mousedown(function($event) {
-            console.log("LI");
             $event.preventDefault();
             $event.stopPropagation();
             $scope.$apply(function() {
@@ -24,7 +21,7 @@ angular.module('corespring.math-input')
           });
           $element.mouseup(function($event) {
             $event.preventDefault();
-            $event.stopPropagation()
+            $event.stopPropagation();
             $scope.$apply(function() {
               $scope.state = 'rest';
               $scope.click();

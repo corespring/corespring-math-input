@@ -1,3 +1,5 @@
+/*jshint camelcase: false */
+
 angular.module('corespring.math-input')
   .factory('MathInputConfig', [
     '$sce',

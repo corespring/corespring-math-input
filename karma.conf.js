@@ -21,6 +21,7 @@ module.exports = function(config) {
       'bower_components/undo.js/undo.js',
       'test/polyfill/bind.js',
       'src/js/**/_declaration.js',
+      'src/js/**/*.js',
       'src/js/directives/**/*.js',
       'src/js/*-dom-*.js',
       'test/helpers/*.js',
