@@ -48,7 +48,7 @@ angular.module('corespring.math-input')
         }
 
         function fixBackslashes(expression) {
-          return expression.replace(/\\/g, '\\\\');
+          return _.isString(expression) &&  expression.replace(/\\/g, '\\\\');
         }
 
         function onInputChange(skipApply) {
@@ -96,6 +96,13 @@ angular.module('corespring.math-input')
 
             onInputChange(true);
           };
+
+          $timeout(function() {
+            if ($scope.keypadAutoOpen === 'true') {
+              onInputFieldClick.apply($element.find('.mq'));
+              $scope.focusedInput.find('textarea').focus();
+            }
+          });
         }
 
         function init() {
@@ -116,6 +123,7 @@ angular.module('corespring.math-input')
           expression: '=',
           editable: '@',
           keypadType: '=',
+          keypadAutoOpen: '@',
           ngModel: '='
         }
       };
