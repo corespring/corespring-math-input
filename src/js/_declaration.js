@@ -1,3 +1,1 @@
-angular.module('corespring.math-input', [
-
-]);
+angular.module('corespring.math-input', []);

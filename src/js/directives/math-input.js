@@ -14,7 +14,7 @@ angular.module('corespring.math-input')
           '  <div class="input">',
           '    <span class="mq"></span>',
           '  </div>',
-          '  <keypad ng-show="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
+          '  <keypad ng-if="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
           '</div>'
 
         ].join('\n');
@@ -22,18 +22,6 @@ angular.module('corespring.math-input')
 
       var link = function($scope, $element, $attrs) {
         new MathInputConfig().postLink($scope);
-
-        function initDom(el, attrs) {
-          var node = $(template());
-          var $node = $(node);
-
-          // set id for directive instance
-          $scope.instanceId = Math.random().toString(36).substring(7);
-          $node.attr('id', $scope.instanceId);
-          log('Instance ID: ' + $scope.instanceId);
-
-          return $node;
-        }
 
         function onInputFieldClick() {
           $scope.showKeypad = $scope.editable === 'true';
@@ -51,12 +39,28 @@ angular.module('corespring.math-input')
           return _.isString(expression) &&  expression.replace(/\\/g, '\\\\');
         }
 
+
+        function repositionKeypad() {
+          var kpWidth = 290;
+          var playerElement = $element.parents('.corespring-player');
+          var mqElement = $element.find('.mq');
+
+          var mqOffset = mqElement.offset();
+          var currentOffset = {left: mqOffset.left};
+          if (currentOffset.left + kpWidth > playerElement.width()) {
+            currentOffset.left = playerElement.width() - kpWidth;
+          }
+          currentOffset.top = mqOffset.top + mqElement.outerHeight() + 5;
+          $element.find('.keypad').offset(currentOffset);
+        }
+
         function onInputChange(skipApply) {
           var latex = $element.find('.mq').mathquill('latex');
           $scope.ngModel = fixBackslashes(latex);
           if (!skipApply) {
             $scope.$apply();
           }
+          repositionKeypad();
         }
 
         function initMethods() {
@@ -96,6 +100,15 @@ angular.module('corespring.math-input')
 
             onInputChange(true);
           };
+
+          $scope.$watch('showKeypad', function(n) {
+            if (n) {
+              setTimeout(function() {
+                repositionKeypad();
+              }, 1);
+            }
+          });
+
 
           $timeout(function() {
             if ($scope.keypadAutoOpen === 'true') {
