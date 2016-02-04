@@ -1,11 +1,6 @@
 .header CoreSpring math enabled input
-br
-div The answer is A:
-  math-input(expression='expression', style="min-width: 50px;", editable='editable', keypad-type='keypadType', dotted='true')
-  span and b is:
-  math-input(expression='expression', style="min-width: 50px;", editable='editable', keypad-type='keypadType')
-
-div The answer is A:
-  math-input(expression='expression', style="min-width: 50px;", editable='editable', keypad-type='keypadType')
-  span and b is:
-  math-input(expression='expression', style="min-width: 50px;", editable='editable', keypad-type='keypadType')
+  br
+  div The answer is A:
+    math-input(style="min-width: 50px;", editable='true', keypad-type='"basic"', dotted='true', expression='\'3x+4\'', ng-model='latex')
+  div {{latex}}
+           

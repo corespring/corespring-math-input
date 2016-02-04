@@ -1,8 +1,6 @@
 angular.module('corespring.math-input')
   .directive('keypadButton', [
     function() {
-
-
       return {
         restrict: 'AE',
         scope: {

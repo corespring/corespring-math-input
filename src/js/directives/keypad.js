@@ -1,7 +1,7 @@
 angular.module('corespring.math-input')
   .directive('keypad', [
-    'KeypadDef',
-    function(Def) {
+    'MathInputConfig',
+    function(MathInputConfig) {
 
       function template() {
         return [
@@ -22,11 +22,19 @@ angular.module('corespring.math-input')
         ].join('\n');
       }
 
-      var def = new Def(template);
+      var link = function($scope, $element, $attrs) {
+        new MathInputConfig().postLink($scope);
+        $scope.onClick = function(button) {
+          if (_.isFunction($scope.onClickCallback)) {
+            $scope.onClickCallback({action: button});
+          }
+        };
+      };
 
       return {
         restrict: 'E',
-        link: def.link,
+        link: link,
+        template: template(),
         replace: true,
         scope: {
           keypadType: '=',

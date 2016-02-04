@@ -6,9 +6,9 @@ angular.module('corespring.math-input')
     function($sce) {
 
       var buttons = {};
-      // Cursor section
+      // Clear section
       buttons.ac = { id: 'ac', name: 'AC', symbol: $sce.trustAsHtml('AC'), logic: 'clear', command: 'clear', shortcut: '', cssClass: 'cursor' };
-
+      // Cursor section
       buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'moveLeft', shortcut: '', cssClass: 'cursor' };
       buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'moveRight', shortcut: '', cssClass: 'cursor' };
       buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'moveUp', shortcut: '', cssClass: 'cursor' };
@@ -169,15 +169,10 @@ angular.module('corespring.math-input')
           'percentage': '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58"><style>.st0-135{fill:#b6e2ef;stroke:#60564b}.st0-135,.st1-135{stroke-miterlimit:10}.st1-135{fill:#464146;stroke:#464146;stroke-width:.5}</style><path class="st0-135" d="M52.7 55.7H5.3c-1.7 0-3-1.3-3-3V5.3c0-1.7 1.3-3 3-3h47.5c1.7 0 3 1.3 3 3v47.5c-.1 1.6-1.4 2.9-3.1 2.9z"/><path class="st1-135" d="M20.7 18.5c.8 0 1.6.1 2.2.4s1.2.7 1.6 1.2.8 1.2 1 1.9.3 1.6.3 2.6c0 2-.5 3.6-1.4 4.6-.9 1.1-2.2 1.6-3.9 1.6-1.7 0-3-.5-3.9-1.6-.9-1.1-1.4-2.6-1.4-4.6 0-2 .5-3.5 1.4-4.6s2.4-1.5 4.1-1.5zm-.1 1.3c-2 0-2.9 1.7-2.9 5 0 1.6.2 2.8.7 3.7s1.2 1.2 2.2 1.2c1 0 1.7-.4 2.2-1.2s.8-2 .8-3.7c0-1.7-.3-2.9-.8-3.7s-1.1-1.3-2.2-1.3zm17.3-1.1L22.1 41.9h-1.9L36 18.7h1.9zm-.4 10.9c1.7 0 3 .5 3.9 1.6s1.3 2.6 1.3 4.7c0 1.9-.5 3.4-1.4 4.5S39.1 42 37.4 42c-1.7 0-3-.5-3.9-1.6s-1.4-2.6-1.4-4.6c0-2 .5-3.5 1.4-4.6s2.3-1.6 4-1.6zm-.1 1.3c-1 0-1.7.4-2.2 1.3s-.7 2.1-.7 3.7.3 2.8.8 3.6 1.3 1.2 2.2 1.2 1.8-.4 2.3-1.2.8-2 .8-3.6c0-1.7-.3-3-.8-3.8s-1.3-1.2-2.4-1.2z"/></svg>',
           'x': '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58"><style>.st0-136{fill:#b6e2ef;stroke:#60564b}.st0-136,.st1-136{stroke-miterlimit:10}.st1-136{fill:#464146;stroke:#464146;stroke-width:.5}</style><path class="st0-136" d="M52.7 55.7H5.3c-1.7 0-3-1.3-3-3V5.3c0-1.7 1.3-3 3-3h47.5c1.7 0 3 1.3 3 3v47.5c-.1 1.6-1.4 2.9-3.1 2.9z"/><path class="st1-136" d="M23.1 30.3c.9-2.2 2.5-5.5 5.3-5.5 2.4 0 2.9 2.4 3.4 4.3.9-1.4 2.5-4.3 4.4-4.3 1.2 0 2.1.7 2.1 1.9 0 1.3-.8 2-2 2-.4 0-.8-.2-1.2-.4-.4-.2-.6-.4-.8-.4-.9.1-2.3 2.2-2.2 2.8l1.2 5.4c.2.9.3 1.7 1 1.7.8 0 2.3-2.8 2.6-3.6l.8.3c-.9 2.3-2.6 5.3-5.4 5.3-3 0-3.5-3.1-4-5.4-1.2 2-2.4 5.4-5.3 5.4-1.3 0-1.9-1.1-1.9-2.3 0-1 .9-1.9 1.9-1.9.7 0 1.3.4 1.7.6.3.1.6.4.7.4.5 0 2.2-2.1 2.6-3.3l-1.3-5.7c0-.1-.2-.4-.4-.4-1 0-2.1 2.7-2.5 3.4l-.7-.3z"/></svg>',
           'y': '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58"><style>.st0-137{fill:#b6e2ef;stroke:#60564b}.st0-137,.st1-137{stroke-miterlimit:10}.st1-137{fill:#464146;stroke:#464146;stroke-width:.5}</style><path class="st0-137" d="M52.7 55.7H5.3c-1.7 0-3-1.3-3-3V5.3c0-1.7 1.3-3 3-3h47.5c1.7 0 3 1.3 3 3v47.5c-.1 1.6-1.4 2.9-3.1 2.9z"/><path class="st1-137" d="M31.2 34.3l2.4-6.6c.4-1.1.9-2.9 2.4-2.9 1 0 1.7.8 1.7 1.8 0 .9-.4 2-1.5 2-.3 0-.7-.3-1-.3-.6-.1-.9 1-1.1 1.4l-3.7 9.6c-1.2 3-3.5 7.7-7.2 7.7-1.4 0-2.6-1-2.6-2.4 0-1.2.8-2.2 2.1-2.2 1.2 0 2.2.8 1.9 1.9-.1.6.2.8.6.8.8 0 3-3 3.1-3.8.1-.3.1-.6.1-.9 0-.6-.3-1.3-.5-1.9l-3-8.7c-.2-.5-.5-2.2-1.2-2.2-.8 0-1.9 2.2-2.2 2.8l-.8-.3c.8-2 2.8-5.3 5.2-5.3 1.2 0 2.6.1 3.3 2.8l2 6.7z"/></svg>'
-
-
         }).mapValues(function(v) { return $sce.trustAsHtml(v); }).value()
       };
 
-
-
       function MathInputConfig() {
-
         this.postLink = function(scope) {
           scope.types = types;
           scope.sections = sections;
