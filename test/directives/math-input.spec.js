@@ -83,8 +83,30 @@ describe('math input', function() {
         expect($.fn.mathquill.calls.count()).toEqual(2);
         expect($.fn.mathquill.calls.argsFor(0)).toEqual(['latex', '']);
         expect($.fn.mathquill.calls.argsFor(1)).toEqual(['latex']);
-
+      });
+      it('cursor logic is executed', function() {
+        createDirective({autoOpen: true});
+        timeout.flush();
+        $.fn.mathquill.calls.reset();
+        directiveScope.clickButton('left');
+        expect($.fn.mathquill.calls.argsFor(0)).toEqual(['cursor', 'moveLeft']);
+      });
+      it('command logic is executed', function() {
+        createDirective({autoOpen: true});
+        timeout.flush();
+        $.fn.mathquill.calls.reset();
+        directiveScope.clickButton('two');
+        expect($.fn.mathquill.calls.argsFor(0)).toEqual(['cmd', '2']);
+      });
+      it('write logic is executed', function() {
+        createDirective({autoOpen: true});
+        timeout.flush();
+        $.fn.mathquill.calls.reset();
+        directiveScope.clickButton('approx');
+        expect($.fn.mathquill.calls.argsFor(0)).toEqual(['write', '\\approx']);
       });
     });
+
+
   });
 });
