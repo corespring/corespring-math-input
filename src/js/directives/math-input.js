@@ -43,12 +43,14 @@ angular.module('corespring.math-input')
         function repositionKeypad() {
           var kpWidth = 290;
           var playerElement = $element.parents('.corespring-player');
+          var playerElementLeft = playerElement.offset().left;
           var mqElement = $element.find('.mq');
 
           var mqOffset = mqElement.offset();
           var currentOffset = {left: mqOffset.left};
-          if (currentOffset.left + kpWidth > playerElement.width()) {
-            currentOffset.left = playerElement.width() - kpWidth;
+
+          if (currentOffset.left + kpWidth > playerElementLeft + playerElement.width()) {
+            currentOffset.left = playerElementLeft + playerElement.width() - kpWidth;
           }
           currentOffset.top = mqOffset.top + mqElement.outerHeight() + 5;
           $element.find('.keypad').offset(currentOffset);
@@ -108,7 +110,6 @@ angular.module('corespring.math-input')
               }, 1);
             }
           });
-
 
           $timeout(function() {
             if ($scope.keypadAutoOpen === 'true') {
