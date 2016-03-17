@@ -11,38 +11,60 @@ angular.module('corespring.math-input')
       function template() {
         return [
           '<div class="math-input">',
-          '  <div class="input">',
+          '  <div class="input" ng-hide="code">',
           '    <span class="mq"></span>',
           '  </div>',
-          '  <keypad ng-if="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
+          '  <div class="renderFromCode" ng-show="code" ng-click="openCodepad()"><span class="mjax"></span></div>',
+          '  <keypad ng-if="showKeypad" keypad-type="keypadType" on-click-callback="clickButton(action)" show-codepad-callback="showCodepadCallback()" show-code-button="{{showCodeButton}}"></keypad>',
+          '  <codepad ng-if="showCodepad" code-model="$parent.code" back-to-keypad="openKeypad()"></codepad>',
           '</div>'
-
         ].join('\n');
       }
 
       var link = function($scope, $element, $attrs) {
         new MathInputConfig().postLink($scope);
+        $scope.showCodepad = false;
+        $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
 
         function onInputFieldClick() {
-          $scope.showKeypad = $scope.editable === 'true';
+          $scope.showKeypad = $scope.editable === 'true' && _.isEmpty($scope.code);
+          $scope.showCodepad = $scope.editable === 'true' && !_.isEmpty($scope.code);
           $scope.focusedInput = $(this);
-          $document.on('mousedown', function(event) {
-            $scope.$apply(function() {
-              $scope.showKeypad = false;
-            });
-            $document.off('mousedown');
-          });
+          attachClickOutsideListener();
           $scope.$apply();
         }
 
+        function isMathML(text) {
+          return /\s*?<math.*?>/.test(text);
+        }
+
         function fixBackslashes(expression) {
-          return _.isString(expression) &&  expression.replace(/\\/g, '\\\\');
+          return ($scope.fixBackslash === 'true' || $scope.fixBackslash === undefined) ? (_.isString(expression) &&  expression.replace(/\\/g, '\\\\')) : expression;
+        }
+
+        function attachClickOutsideListener() {
+          if (!$scope.clickOutsideListenerAttached) {
+            $document.on('mousedown', function(event) {
+              $scope.$apply(function() {
+                $scope.showKeypad = false;
+                $scope.showCodepad = false;
+              });
+              $document.off('mousedown');
+              $scope.clickOutsideListenerAttached = false;
+            });
+            $scope.clickOutsideListenerAttached = true;
+          }
         }
 
 
         function repositionKeypad() {
           var kpWidth = 290;
-          var playerElement = $element.parents('.corespring-player');
+          var playerElement = $element.parents($scope.parentSelectorCalculated);
+
+          if (!playerElement) {
+            return;
+          }
+
           var playerElementLeft = playerElement.offset().left;
           var mqElement = $element.find('.mq');
 
@@ -57,6 +79,9 @@ angular.module('corespring.math-input')
         }
 
         function onInputChange(skipApply) {
+          if (!$scope.showKeypad) {
+            return;
+          }
           var latex = $element.find('.mq').mathquill('latex');
           $scope.ngModel = fixBackslashes(latex);
           if (!skipApply) {
@@ -77,13 +102,37 @@ angular.module('corespring.math-input')
           });
 
           mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
-          if ($scope.expression) {
+          if ($scope.expression && !isMathML($scope.expression)) {
             mqElement.mathquill('latex', $scope.expression);
             $scope.ngModel = fixBackslashes($scope.expression);
             mqElement.blur();
+          } else if ($scope.expression && isMathML($scope.expression)) {
+            $scope.code = $scope.expression;
           } else {
             $scope.ngModel = '';
           }
+
+          $scope.showCodepadCallback = function() {
+            $scope.showKeypad = false;
+            $scope.showCodepad = true;
+          };
+
+          $scope.openCodepad = function() {
+            $scope.showCodepad = true;
+            attachClickOutsideListener();
+          };
+
+          $scope.openKeypad = function() {
+            $scope.codeModel = $scope.code = undefined;
+            $scope.showCodepad = false;
+            $scope.showKeypad = true;
+            attachClickOutsideListener();
+            var savedModel = $scope.ngModel;
+            $scope.ngModel = '';
+            $timeout(function() {
+              $scope.ngModel = savedModel;
+            });
+          };
 
           $scope.clickButton = function(action) {
             var button = $scope.buttons[action];
@@ -108,6 +157,15 @@ angular.module('corespring.math-input')
               setTimeout(function() {
                 repositionKeypad();
               }, 1);
+            }
+          });
+
+          $scope.$watch('code', function(n) {
+            $scope.codeModel = n;
+            if (isMathML(n)) {
+              $element.find('.mjax').html(n);
+            } else {
+              $element.find('.mjax').html('\\(' + n + '\\)');
             }
           });
 
@@ -138,7 +196,11 @@ angular.module('corespring.math-input')
           editable: '@',
           keypadType: '=',
           keypadAutoOpen: '@',
-          ngModel: '='
+          ngModel: '=',
+          codeModel: '=',
+          parentSelector: '@',
+          fixBackslash: '@',
+          showCodeButton: '@'
         }
       };
     }
