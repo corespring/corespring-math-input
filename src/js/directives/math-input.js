@@ -91,7 +91,7 @@ angular.module('corespring.math-input')
 
 
         function repositionKeypad() {
-          var kpWidth = 290;
+          var kpWidth = 300;
           var playerElement = $element.parents($scope.parentSelectorCalculated);
 
           if (!playerElement) {
