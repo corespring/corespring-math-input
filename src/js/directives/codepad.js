@@ -18,7 +18,6 @@ angular.module('corespring.math-input')
         new MathInputConfig().postLink($scope);
         $scope.cancelEvent = function(ev) {
           ev.stopPropagation();
-          ev.preventDefault();
         };
 
         $scope.inputClick = function(ev) {

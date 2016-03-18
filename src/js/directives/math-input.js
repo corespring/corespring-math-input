@@ -38,6 +38,39 @@ angular.module('corespring.math-input')
           return /\s*?<math.*?>/.test(text);
         }
 
+        function isMathquillCompatible(text) {
+          if (isMathML(text)) {
+            return false;
+          }
+          var supportedTags = ['aleph', 'alpha', 'amalg', 'angle', 'approx', 'arccos', 'arcsin', 'arctan', 'ast',
+            'asymp', 'backslash', 'beta', 'bigcirc', 'bigtriangledown', 'bigtriangleup', 'bot', 'bowtie', 'bullet',
+            'cap', 'cdot', 'cdots', 'chi', 'circ', 'clubsuit', 'cong', 'cos', 'cosh', 'cot', 'coth', 'csc', 'cup',
+            'dagger', 'dashv', 'ddagger', 'ddots', 'deg', 'delta', 'det', 'diamond', 'diamondsuit', 'dim', 'div',
+            'doteq', 'dots', 'downarrow', 'ell', 'emptyset', 'epsilon', 'eq', 'equiv', 'eta', 'exists', 'flat',
+            'forall', 'frac', 'frown', 'gamma', 'gcd', 'ge', 'geq', 'gg', 'gt', 'hbar', 'heartsuit', 'hookleftarrow',
+            'hookrightarrow', 'Im', 'in', 'inf', 'infty', 'kappa', 'lambda', 'ldots', 'left', 'leftarrow', 'leftharpoondown',
+            'leftharpoonup', 'leftrightarrow', 'leq', 'lg', 'll', 'ln', 'log', 'log_b', 'longleftarrow', 'longleftrightarrow',
+            'longrightarrow', 'lt', 'mapsto', 'max', 'mid', 'min', 'models', 'mp', 'mu', 'nabla', 'natural', 'nearrow', 'qqqne',
+            'neg', 'neq', 'ni', 'nu', 'nwarrow', 'odot', 'omega', 'ominus', 'oplus', 'oslash', 'otimes', 'overline', 'parallel',
+            'partial', 'perp', 'phi', 'pi', 'pm', 'prec', 'preceq', 'prime', 'propto', 'psi', 'Re', 'rho', 'right', 'rightarrow',
+            'rightharpoondown', 'rightharpoonup', 'searrow', 'sec', 'setminus', 'sharp', 'sigma', 'sim', 'simeq', 'sin', 'sinh',
+            'smile', 'spadesuit', 'sqcap', 'sqcup', 'sqrt', 'sqsubseteq', 'sqsupseteq', 'star', 'subset', 'subseteq', 'succ',
+            'succeq', 'sup', 'supset', 'supseteq', 'surd', 'swarrow', 'tan', 'tanh', 'tau', 'text', 'theta', 'times', 'top',
+            'triangle', 'triangleleft', 'triangleright', 'uparrow', 'updownarrow', 'uplus', 'upsilon', 'varepsilon',
+            'varnothing', 'varphi', 'varpi', 'varrho', 'varsigma', 'vartheta', 'vdash', 'vdots', 'vee', 'wedge', 'wp', 'wr', 'xi',
+            'zeta'];
+          var matches = text.match(/\\[a-zA-Z]+/g);
+          if (!matches) {
+            return true;
+          }
+          for (var i = 0; i < matches.length; i++) {
+            var m = matches[i].substring(1);
+            var ix = supportedTags.indexOf(m.toLowerCase());
+            if (ix == -1) return false;
+          }
+          return true;
+        }
+
         function fixBackslashes(expression) {
           return ($scope.fixBackslash === 'true' || $scope.fixBackslash === undefined) ? (_.isString(expression) &&  expression.replace(/\\/g, '\\\\')) : expression;
         }
@@ -102,11 +135,11 @@ angular.module('corespring.math-input')
           });
 
           mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
-          if ($scope.expression && !isMathML($scope.expression)) {
+          if ($scope.expression && isMathquillCompatible($scope.expression)) {
             mqElement.mathquill('latex', $scope.expression);
             $scope.ngModel = fixBackslashes($scope.expression);
             mqElement.blur();
-          } else if ($scope.expression && isMathML($scope.expression)) {
+          } else if ($scope.expression) {
             $scope.code = $scope.expression;
           } else {
             $scope.ngModel = '';
@@ -123,6 +156,9 @@ angular.module('corespring.math-input')
           };
 
           $scope.openKeypad = function() {
+            if (!$scope.focusedInput) {
+              $scope.focusedInput = mqElement;
+            }
             $scope.codeModel = $scope.code = undefined;
             $scope.showCodepad = false;
             $scope.showKeypad = true;
