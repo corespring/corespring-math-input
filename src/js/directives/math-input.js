@@ -66,7 +66,9 @@ angular.module('corespring.math-input')
           for (var i = 0; i < matches.length; i++) {
             var m = matches[i].substring(1);
             var ix = supportedTags.indexOf(m.toLowerCase());
-            if (ix == -1) return false;
+            if (ix === -1) {
+              return false;
+            }
           }
           return true;
         }
