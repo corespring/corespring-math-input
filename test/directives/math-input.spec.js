@@ -28,6 +28,7 @@ describe('math input', function() {
         element = $compile(node)(scope);
         directiveScope = element.isolateScope();
         timeout = $timeout;
+        $timeout.flush();
       });
     }
 
@@ -68,7 +69,6 @@ describe('math input', function() {
 
       it('keypad auto open opens keypad', function() {
         createDirective({autoOpen: true});
-        timeout.flush();
         expect(directiveScope.showKeypad).toEqual(true);
         expect(directiveScope.focusedInput.selector).toEqual('.mq');
       });
@@ -77,7 +77,6 @@ describe('math input', function() {
     describe('buttons', function() {
       it('clear clears out the input', function() {
         createDirective({autoOpen: true});
-        timeout.flush();
         $.fn.mathquill.calls.reset();
         directiveScope.clickButton('ac');
         expect($.fn.mathquill.calls.count()).toEqual(2);
@@ -86,21 +85,18 @@ describe('math input', function() {
       });
       it('cursor logic is executed', function() {
         createDirective({autoOpen: true});
-        timeout.flush();
         $.fn.mathquill.calls.reset();
         directiveScope.clickButton('left');
         expect($.fn.mathquill.calls.argsFor(0)).toEqual(['cursor', 'moveLeft']);
       });
       it('command logic is executed', function() {
         createDirective({autoOpen: true});
-        timeout.flush();
         $.fn.mathquill.calls.reset();
         directiveScope.clickButton('two');
         expect($.fn.mathquill.calls.argsFor(0)).toEqual(['cmd', '2']);
       });
       it('write logic is executed', function() {
         createDirective({autoOpen: true});
-        timeout.flush();
         $.fn.mathquill.calls.reset();
         directiveScope.clickButton('approx');
         expect($.fn.mathquill.calls.argsFor(0)).toEqual(['write', '\\approx']);

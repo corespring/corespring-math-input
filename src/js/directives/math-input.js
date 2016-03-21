@@ -95,7 +95,7 @@ angular.module('corespring.math-input')
           var elementWidth = el.width() + 20;
           var playerElement = $element.parents($scope.parentSelectorCalculated);
 
-          if (!playerElement || elementWidth === 0) {
+          if (!playerElement || !playerElement.offset() || elementWidth === 0) {
             return;
           }
 
