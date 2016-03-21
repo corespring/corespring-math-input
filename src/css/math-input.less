@@ -11,6 +11,10 @@
   margin: 0px 5px;
   display: inline-block;
 
+  .renderFromCode {
+    border: 1px solid #D4D4D4;
+  }
+
   .input {
     &.dotted > span {
       border-style: dotted;
@@ -21,21 +25,55 @@
         top: 0px;
       }
     }
+  }
 
+  .code-button {
+    padding: 2px;
+    border: 1px solid #bebebe;
+    border-radius: 20px;
+    background-color: #FFFFFF;
+    display: inline-block;
+    margin-right: 5px;
+    float: right;
+    color: #1a9cff;
+    width: 25px;
+    text-align: center;
+  }
+
+  .codepad {
+    background-color: #F8F6F6;
+    position: absolute;
+    padding: 5px;
+    border: 1px solid #BEBEBE;
+    border-radius: 5px;
+    z-index: 10100;
+    margin-top: 2px;
+    .code-button {
+      background-color: #5bc0de;
+      color: #FFFFFF;
+      &.disabled {
+        color: lightgray;
+        background-color: darkgray;
+      }
+    }
+    .code-input {
+      width: 290px;
+      height: 185px;
+    }
   }
 
   .basic {
 
     &.keypad {
       padding: 10px 0px 10px 10px;
-      margin: 0;
+      margin-top: 2px;
       border: 1px solid #BEBEBE;
       border-radius: 5px;
       background-color: #F8F6F6;
       color: #FFFFFF;
       font-family: 'Montserrat', sans-serif;
       font-size: 14px;
-      z-index: 100;
+      z-index: 10100;
       position: absolute;
     }
 

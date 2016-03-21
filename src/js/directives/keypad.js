@@ -15,8 +15,11 @@ angular.module('corespring.math-input')
           '            keypad-button=""',
           '            keypad-button-graphics="graphics"',
           '            keypad-button-button="button"',
-          '            keypad-button-click="onClick(button)"',
+          '            keypad-button-click="onClick(button)">',
           '    </div>',
+          '  </div>',
+          '  <div ng-show="showCodeButton == \'true\'">',
+          '    <div class="code-button" ng-mousedown="cancel($event)" ng-click="showCodepadCallback()"><i class="fa fa-code"></i></div>',
           '  </div>',
           '</div>'
         ].join('\n');
@@ -24,6 +27,11 @@ angular.module('corespring.math-input')
 
       var link = function($scope, $element, $attrs) {
         new MathInputConfig().postLink($scope);
+        $scope.cancel = function(ev) {
+          ev.stopPropagation();
+          ev.preventDefault();
+        };
+
         $scope.onClick = function(button) {
           if (_.isFunction($scope.onClickCallback)) {
             $scope.onClickCallback({action: button});
@@ -38,8 +46,10 @@ angular.module('corespring.math-input')
         replace: true,
         scope: {
           keypadType: '=',
-          showKeypad: '=',
-          onClickCallback: '&'
+          onClickCallback: '&',
+          codeModel: '=',
+          showCodepadCallback: '&',
+          showCodeButton: '@'
         }
       };
     }
