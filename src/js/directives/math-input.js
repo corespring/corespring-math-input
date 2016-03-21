@@ -89,26 +89,34 @@ angular.module('corespring.math-input')
           }
         }
 
-
-        function repositionKeypad() {
-          var kpWidth = 300;
+        function repositionElement(el, referenceElement) {
+          var elementWidth = el.width() + 20;
           var playerElement = $element.parents($scope.parentSelectorCalculated);
 
-          if (!playerElement) {
+          if (!playerElement || elementWidth === 0) {
             return;
           }
 
           var playerElementLeft = playerElement.offset().left;
-          var mqElement = $element.find('.mq');
 
-          var mqOffset = mqElement.offset();
+          var mqOffset = referenceElement.offset();
           var currentOffset = {left: mqOffset.left};
 
-          if (currentOffset.left + kpWidth > playerElementLeft + playerElement.width()) {
-            currentOffset.left = playerElementLeft + playerElement.width() - kpWidth;
+          if (currentOffset.left + elementWidth > playerElementLeft + playerElement.width()) {
+            currentOffset.left = playerElementLeft + playerElement.width() - elementWidth;
           }
-          currentOffset.top = mqOffset.top + mqElement.outerHeight() + 5;
-          $element.find('.keypad').offset(currentOffset);
+          currentOffset.top = mqOffset.top + referenceElement.outerHeight() + 5;
+          el.offset(currentOffset);
+
+        }
+
+        function repositionKeypad() {
+          repositionElement($element.find('.keypad'), $element.find('.mq'));
+        }
+
+        function repositionCodepad() {
+          var refElem = _.isEmpty($scope.code) ? $element.find('.mq') : $element.find('.renderFromCode');
+          repositionElement($element.find('.codepad'),refElem );
         }
 
         function onInputChange(skipApply) {
@@ -196,6 +204,14 @@ angular.module('corespring.math-input')
             }
           });
 
+          $scope.$watch('showCodepad', function(n) {
+            if (n) {
+              setTimeout(function() {
+                repositionCodepad();
+              }, 1);
+            }
+          });
+
           $scope.$watch('code', function(n) {
             $scope.codeModel = n;
             if (isMathML(n)) {
@@ -216,7 +232,7 @@ angular.module('corespring.math-input')
         function init() {
           $scope.showKeypad = false;
           $scope.focusedInput = null;
-          initMethods();
+          $timeout(initMethods, 10);
         }
 
         init();
