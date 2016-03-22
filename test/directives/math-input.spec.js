@@ -19,7 +19,7 @@ describe('math input', function() {
       return inject(function($compile, $rootScope, $timeout) {
         scope = $rootScope.$new();
         var node = angular.element([
-          '<math-input ng-model="model" keypad-type="\'basic\'" editable="' + opts.editable + '" ',
+          '<math-input ng-model="model" code-model="codeModel" keypad-type="\'basic\'" editable="' + opts.editable + '" ',
           opts.expression ? ('expression="\'' + opts.expression + '\'" ') : ' ',
           opts.autoOpen ? ('keypad-auto-open="true" ') : ' ',
           '>',
@@ -71,6 +71,57 @@ describe('math input', function() {
         createDirective({autoOpen: true});
         expect(directiveScope.showKeypad).toEqual(true);
         expect(directiveScope.focusedInput.selector).toEqual('.mq');
+      });
+    });
+
+    describe('mathquill support detection, dont use mathquill case', function() {
+      it('no mathquill for mathml', function() {
+        createDirective({expression: '<math></math>'});
+        expect(directiveScope.code).toEqual('<math></math>');
+        expect(directiveScope.ngModel).toEqual(undefined);
+      });
+      it('no mathquill for unknown tag', function() {
+        createDirective({expression: '\\\\dfrac34'});
+        expect(directiveScope.code).toEqual('\\dfrac34');
+        expect(directiveScope.model).toEqual(undefined);
+      });
+      it('no mathquill for $', function() {
+        createDirective({expression: '$'});
+        expect(directiveScope.code).toEqual('$');
+        expect(directiveScope.ngModel).toEqual(undefined);
+      });
+      it('no mathquill for \\;', function() {
+        createDirective({expression: '\\\\;'});
+        expect(directiveScope.code).toEqual('\\;');
+        expect(directiveScope.ngModel).toEqual(undefined);
+      });
+      it('no mathquill for \\{', function() {
+        createDirective({expression: '\\\\{'});
+        expect(directiveScope.code).toEqual('\\{');
+        expect(directiveScope.ngModel).toEqual(undefined);
+      });
+      it('no mathquill for \\}', function() {
+        createDirective({expression: '\\\\}'});
+        expect(directiveScope.code).toEqual('\\}');
+        expect(directiveScope.ngModel).toEqual(undefined);
+      });
+    });
+
+    describe('mathquill support detection, use mathquill case', function() {
+      it('mathquill for known tags', function() {
+        createDirective({expression: '\\\\frac34'});
+        expect(directiveScope.code).toEqual(undefined);
+        expect(directiveScope.ngModel).toEqual('\\\\frac34');
+      });
+      it('mathquill with {}', function() {
+        createDirective({expression: '\\\\frac{3}{4}'});
+        expect(directiveScope.code).toEqual(undefined);
+        expect(directiveScope.ngModel).toEqual('\\\\frac{3}{4}');
+      });
+      it('mathquill with complex expression', function() {
+        createDirective({expression: '\\\\frac{3}{4} 3 \\\\neq 4'});
+        expect(directiveScope.code).toEqual(undefined);
+        expect(directiveScope.ngModel).toEqual('\\\\frac{3}{4} 3 \\\\neq 4');
       });
     });
 
