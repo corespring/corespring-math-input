@@ -27,6 +27,7 @@ angular.module('corespring.math-input')
         $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
 
         function onInputFieldClick() {
+          $($document).trigger('mousedown');
           $scope.showKeypad = $scope.editable === 'true' && _.isEmpty($scope.code);
           $scope.showCodepad = $scope.editable === 'true' && !_.isEmpty($scope.code);
           $scope.focusedInput = $(this);
@@ -40,6 +41,9 @@ angular.module('corespring.math-input')
 
         function isMathquillCompatible(text) {
           if (isMathML(text)) {
+            return false;
+          }
+          if (text.match(/\$/)) {
             return false;
           }
           var supportedTags = ['aleph', 'alpha', 'amalg', 'angle', 'approx', 'arccos', 'arcsin', 'arctan', 'ast',
@@ -59,7 +63,7 @@ angular.module('corespring.math-input')
             'triangle', 'triangleleft', 'triangleright', 'uparrow', 'updownarrow', 'uplus', 'upsilon', 'varepsilon',
             'varnothing', 'varphi', 'varpi', 'varrho', 'varsigma', 'vartheta', 'vdash', 'vdots', 'vee', 'wedge', 'wp', 'wr', 'xi',
             'zeta'];
-          var matches = text.match(/\\[a-zA-Z]+/g);
+          var matches = text.match(/\\{|\\}|\\[a-zA-Z;:#,]+/g);
           if (!matches) {
             return true;
           }
