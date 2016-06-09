@@ -147,15 +147,24 @@ angular.module('corespring.math-input')
           });
 
           mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
-          if ($scope.expression && isMathquillCompatible($scope.expression)) {
-            mqElement.mathquill('latex', $scope.expression);
-            $scope.ngModel = fixBackslashes($scope.expression);
+          var expr;
+          if ($scope.expressionEncoded) {
+            expr = atob($scope.expressionEncoded);
+          } else {
+            expr = $scope.expression;
+          }
+
+          console.log("boomat", expr);
+          if (expr && isMathquillCompatible(expr)) {
+            mqElement.mathquill('latex', expr);
+            $scope.ngModel = fixBackslashes(expr);
             mqElement.blur();
-          } else if ($scope.expression) {
-            $scope.code = $scope.expression;
+          } else if (expr) {
+            $scope.code = expr;
           } else {
             $scope.ngModel = '';
           }
+
 
           $scope.showCodepadCallback = function() {
             $scope.showKeypad = false;
@@ -249,6 +258,7 @@ angular.module('corespring.math-input')
         replace: true,
         scope: {
           expression: '=',
+          expressionEncoded: '@',
           editable: '@',
           keypadType: '=',
           keypadAutoOpen: '@',
