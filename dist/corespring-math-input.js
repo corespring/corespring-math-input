@@ -1,4 +1,4 @@
-/*! corespring-math-input - v0.0.4 - 2016-03-23
+/*! corespring-math-input - v0.0.4 - 2016-06-09
 * Copyright (c) 2016 CoreSpring; Licensed MIT */
 angular.module('corespring.math-input', []);
 
@@ -296,15 +296,23 @@ angular.module('corespring.math-input')
           });
 
           mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
-          if ($scope.expression && isMathquillCompatible($scope.expression)) {
-            mqElement.mathquill('latex', $scope.expression);
-            $scope.ngModel = fixBackslashes($scope.expression);
+          var expr;
+          if ($scope.expressionEncoded) {
+            expr = atob($scope.expressionEncoded);
+          } else {
+            expr = $scope.expression;
+          }
+
+          if (expr && isMathquillCompatible(expr)) {
+            mqElement.mathquill('latex', expr);
+            $scope.ngModel = fixBackslashes(expr);
             mqElement.blur();
-          } else if ($scope.expression) {
-            $scope.code = $scope.expression;
+          } else if (expr) {
+            $scope.code = expr;
           } else {
             $scope.ngModel = '';
           }
+
 
           $scope.showCodepadCallback = function() {
             $scope.showKeypad = false;
@@ -398,6 +406,7 @@ angular.module('corespring.math-input')
         replace: true,
         scope: {
           expression: '=',
+          expressionEncoded: '@',
           editable: '@',
           keypadType: '=',
           keypadAutoOpen: '@',

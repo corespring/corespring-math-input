@@ -156,7 +156,6 @@ angular.module('corespring.math-input')
             expr = $scope.expression;
           }
 
-          console.log("boomat", expr);
           if (expr && isMathquillCompatible(expr)) {
             mqElement.mathquill('latex', expr);
             $scope.ngModel = fixBackslashes(expr);
