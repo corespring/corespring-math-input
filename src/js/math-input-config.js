@@ -9,11 +9,11 @@ angular.module('corespring.math-input')
       // Clear section
       buttons.ac = { id: 'ac', name: 'AC', symbol: $sce.trustAsHtml('AC'), logic: 'clear', command: 'clear', shortcut: '', cssClass: 'cursor' };
       // Cursor section
-      buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'moveLeft', shortcut: '', cssClass: 'cursor' };
-      buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'moveRight', shortcut: '', cssClass: 'cursor' };
-      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'moveUp', shortcut: '', cssClass: 'cursor' };
-      buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'moveDown', shortcut: '', cssClass: 'cursor' };
-      buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'backspace', shortcut: '', cssClass: 'backspace' };
+      buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'Left', shortcut: '', cssClass: 'cursor' };
+      buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'Right', shortcut: '', cssClass: 'cursor' };
+      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'Up', shortcut: '', cssClass: 'cursor' };
+      buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'Down', shortcut: '', cssClass: 'cursor' };
+      buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'Backspace', shortcut: '', cssClass: 'backspace' };
       // Numeric section
       buttons.one = { id: 'one', name: 'One', symbol: $sce.trustAsHtml('1'), logic: 'write', command: '1', shortcut: '', cssClass: 'number' };
       buttons.two = { id: 'two', name: 'Two', symbol: $sce.trustAsHtml('2'), logic: 'cmd', command: '2', shortcut: '', cssClass: 'number' };
