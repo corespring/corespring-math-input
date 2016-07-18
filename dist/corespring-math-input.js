@@ -174,7 +174,6 @@ angular.module('corespring.math-input')
         $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
 
         function onInputFieldClick() {
-          $($document).trigger('mousedown');
           $scope.showKeypad = $scope.editable === 'true' && _.isEmpty($scope.code);
           $scope.showCodepad = $scope.editable === 'true' && !_.isEmpty($scope.code);
           $scope.focusedInput = $(this);
@@ -227,14 +226,18 @@ angular.module('corespring.math-input')
         }
 
         function attachClickOutsideListener() {
+          
           if (!$scope.clickOutsideListenerAttached) {
             $document.on('mousedown', function(event) {
-              $scope.$apply(function() {
-                $scope.showKeypad = false;
-                $scope.showCodepad = false;
-              });
-              $document.off('mousedown');
-              $scope.clickOutsideListenerAttached = false;
+              var isInMathInput = $.contains($element[0], event.target);
+              if (!isInMathInput) {
+                $scope.$apply(function() {
+                  $scope.showKeypad = false;
+                  $scope.showCodepad = false;
+                });
+                $document.off('mousedown');
+                $scope.clickOutsideListenerAttached = false;
+              }
             });
             $scope.clickOutsideListenerAttached = true;
           }
@@ -284,7 +287,7 @@ angular.module('corespring.math-input')
 
         function initMethods() {
           var mqElement = $element.find('.mq');
-          mqElement.click(onInputFieldClick);
+          $element.click(onInputFieldClick);
           $element.bind('input propertychange', onInputChange);
           $element.bind('keypress', function(ev) {
             if (ev.key.length === 1 && !ev.metaKey) {
