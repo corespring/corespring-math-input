@@ -18,7 +18,7 @@
   "dependencies": {
     "angular": "~1.2.12",
     "jquery": "~1.11.0",
-    "mathquill": "git@github.com:corespring/mathquill.git#master",
+    "mathquill": "git@github.com:mathquill/mathquill.git#v0.10.1",
     "lodash": "~2.4.1"
   },
   "devDependencies": {
