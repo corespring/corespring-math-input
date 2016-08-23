@@ -40,8 +40,7 @@ module.exports = function(grunt) {
     // Task configuration.
     clean: {
       css: ['dist/*.css'],
-      js: ['dist/*.js'],
-      mathquill: ['dist/mathquill']
+      js: ['dist/*.js']
     },
 
     less: {
@@ -99,23 +98,6 @@ module.exports = function(grunt) {
       }
     },
 
-    exec: {
-      'make-mathquill': {
-          cmd: 'make -C bower_components/mathquill'
-      }
-    },
-
-    copy: {
-      mathquill: {
-        files: [{
-          expand: true,
-          cwd: 'bower_components/mathquill/build/',
-          src: ['**'],
-          dest: 'dist/mathquill/'
-        }]
-      },
-    },
-
     watch: {
       js: {
         files: ['src/js/**/*.js'],
@@ -157,7 +139,6 @@ module.exports = function(grunt) {
   grunt.registerTask('build', ['js', 'css']);
   grunt.registerTask('css', ['clean:css', 'less']);
   grunt.registerTask('js', ['clean:js', 'jshint', 'concat', 'uglify']);
-  grunt.registerTask('mathquill', ['clean:mathquill', 'exec:make-mathquill', 'copy:mathquill']);
   grunt.registerTask('run', ['build', 'start-express', 'open', 'watch']);
   //grunt.registerTask('run-site-only', ['start-express', 'express-keepalive']);
   grunt.registerTask('start-express', startExpress);

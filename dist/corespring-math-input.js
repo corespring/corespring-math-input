@@ -1,4 +1,4 @@
-/*! corespring-math-input - v0.0.1 - 2016-07-18
+/*! corespring-math-input - v0.0.1 - 2016-08-23
 * Copyright (c) 2016 CoreSpring; Licensed MIT */
 angular.module('corespring.math-input', []);
 
