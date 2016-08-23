@@ -1,27 +1,70 @@
-/*! corespring-math-input - v0.0.1 - 2016-01-25
+/*! corespring-math-input - v0.0.1 - 2016-08-23
 * Copyright (c) 2016 CoreSpring; Licensed MIT */
-angular.module('corespring.math-input', [
+angular.module('corespring.math-input', []);
 
-]);
+angular.module('corespring.math-input')
+  .directive('codepad', [
+    'MathInputConfig','$document',
+    function(MathInputConfig, $document) {
 
+      function template() {
+        return [
+          '<div class="codepad" ng-mousedown="cancelEvent($event)">',
+          '  <div>',
+          '    <textarea class="code-input" placeholder="Enter MathML or LaTeX code here" ng-mousedown="cancelEvent($event)" ng-click="inputClick($event)" ng-model="codeModel" />',
+          '  </div>',
+          '  <div class="code-button" ng-class="{disabled: codeModel.length > 0}" ng-mousedown="cancelEvent($event)" ng-click="codeButtonClick()"><i class="fa fa-code"></i></div>',
+          '</div>'
+        ].join('\n');
+      }
+
+      var link = function($scope, $element, $attrs) {
+        new MathInputConfig().postLink($scope);
+        $scope.cancelEvent = function(ev) {
+          ev.stopPropagation();
+        };
+
+        $scope.inputClick = function(ev) {
+          $scope.cancelEvent(ev);
+          $element.find('textarea').focus();
+        };
+
+        $scope.codeButtonClick = function() {
+          if (_.isEmpty($scope.codeModel)) {
+            $scope.backToKeypad();
+          }
+        };
+
+        $element.find('textarea').focus();
+      };
+
+      return {
+        restrict: 'E',
+        link: link,
+        template: template(),
+        replace: true,
+        scope: {
+          codeModel: '=',
+          backToKeypad: '&'
+        }
+      };
+    }
+  ]);
 angular.module('corespring.math-input')
   .directive('keypadButton', [
     function() {
-
-
       return {
         restrict: 'AE',
         scope: {
-          click: "&keypadButtonClick",
-          graphics: "=keypadButtonGraphics",
-          button: "=keypadButtonButton"
+          click: '&keypadButtonClick',
+          graphics: '=keypadButtonGraphics',
+          button: '=keypadButtonButton'
         },
         template: '<div style="width: 28px; height: 28px" ng-bind-html="graphics[state][button]"></div>',
         link: function($scope, $element) {
 
           $scope.state = 'rest';
           $element.mousedown(function($event) {
-            console.log("LI");
             $event.preventDefault();
             $event.stopPropagation();
             $scope.$apply(function() {
@@ -30,7 +73,7 @@ angular.module('corespring.math-input')
           });
           $element.mouseup(function($event) {
             $event.preventDefault();
-            $event.stopPropagation()
+            $event.stopPropagation();
             $scope.$apply(function() {
               $scope.state = 'rest';
               $scope.click();
@@ -47,51 +90,9 @@ angular.module('corespring.math-input')
     }
   ]);
 angular.module('corespring.math-input')
-  .factory('KeypadDef', [
-    'MathInputConfig',
-    '$log',
-    '$compile',
-    function(MathInputConfig, $log, $compile){
-
-      var log = $log.debug.bind($log, '[new-keypad-def]');
-
-      function KeypadDefinition(template, link){
-
-        this.link = function($scope, $element, $attrs, ngModel) {
-          new MathInputConfig().postLink($scope);
-
-          function initMethods() {
-
-            $scope.onClick = function(button) {
-              if(_.isFunction($scope.onClickCallback)){
-                $scope.onClickCallback({ action: button });
-              }
-            };
-          }
-
-          function init() {
-            var node = $(template());
-            var $node = $(node);
-            $element.html($node);
-            $compile($node)($scope);
-
-            initMethods();
-
-            $scope.state = 'rest';
-          }
-
-          init();
-
-        };
-      }
-
-      return KeypadDefinition;
-    }
-  ]);
-angular.module('corespring.math-input')
   .directive('keypad', [
-    'KeypadDef',
-    function(Def) {
+    'MathInputConfig',
+    function(MathInputConfig) {
 
       function template() {
         return [
@@ -105,156 +106,313 @@ angular.module('corespring.math-input')
           '            keypad-button=""',
           '            keypad-button-graphics="graphics"',
           '            keypad-button-button="button"',
-          '            keypad-button-click="onClick(button)"',
+          '            keypad-button-click="onClick(button)">',
           '    </div>',
+          '  </div>',
+          '  <div ng-show="showCodeButton == \'true\'">',
+          '    <div class="code-button" ng-mousedown="cancel($event)" ng-click="showCodepadCallback()"><i class="fa fa-code"></i></div>',
           '  </div>',
           '</div>'
         ].join('\n');
       }
 
-      var def = new Def(template);
+      var link = function($scope, $element, $attrs) {
+        new MathInputConfig().postLink($scope);
+        $scope.cancel = function(ev) {
+          ev.stopPropagation();
+          ev.preventDefault();
+        };
+
+        $scope.onClick = function(button) {
+          if (_.isFunction($scope.onClickCallback)) {
+            $scope.onClickCallback({action: button});
+          }
+        };
+      };
 
       return {
         restrict: 'E',
-        link: def.link,
+        link: link,
+        template: template(),
         replace: true,
         scope: {
           keypadType: '=',
-          showKeypad: '=',
-          onClickCallback: '&'
+          onClickCallback: '&',
+          codeModel: '=',
+          showCodepadCallback: '&',
+          showCodeButton: '@'
         }
       };
     }
   ]);
 angular.module('corespring.math-input')
-  .factory('MathInputDef', [
+  .directive('mathInput', [
     'MathInputConfig',
     '$log',
     '$compile',
     '$document',
     '$timeout',
     function(MathInputConfig, $log, $compile, $document, $timeout) {
-
       var log = $log.debug.bind($log, '[math-input-def]');
-
-      function MathInputDefinition(template, link) {
-
-        this.link = function($scope, $element, $attrs) {
-          new MathInputConfig().postLink($scope);
-
-          function initDom(el, attrs) {
-            var node = $(template());
-            var $node = $(node);
-
-            // set id for directive instance
-            $scope.instanceId = Math.random().toString(36).substring(7);
-            $node.attr('id', $scope.instanceId);
-            log('Instance ID: ' + $scope.instanceId);
-
-            return $node;
-          }
-
-          function onInputFieldClick() {
-            $scope.showKeypad = $scope.editable === 'true';
-            $scope.focusedInput = $(this);
-            $document.on('mousedown', function(event) {
-              if (!$.contains($document[0].getElementById($scope.instanceId), event.target)) {
-                $scope.$apply(function() {
-                  $scope.showKeypad = false;
-                });
-                $document.off('mousedown');
-              }
-            });
-            $scope.$apply();
-          }
-
-          function onInputChange() {
-            $scope.ngModel = $element.find('.mq').mathquill('latex');
-            $scope.$apply();
-          }
-
-          function initMethods() {
-            var mqElement = $element.find('.mq');
-            mqElement.click(onInputFieldClick);
-            $element.bind('input propertychange', onInputChange);
-
-            mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
-            if ($scope.expression) {
-              mqElement.mathquill('latex', $scope.expression);
-              $scope.ngModel = $scope.expression;
-              mqElement.blur();
-            } else {
-              $scope.ngModel = '';
-            }
-
-            $scope.clickButton = function(action) {
-              var button = $scope.buttons[action];
-              if (button.logic === 'clear') {
-                $scope.focusedInput.mathquill('latex', '');
-                $timeout(function() {
-                  $scope.focusedInput.find('textarea').focus();
-                }, 1);
-
-              } else if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
-                $scope.focusedInput.mathquill(button.logic, button.command);
-                $timeout(function() {
-                  $scope.focusedInput.find('textarea').focus();
-                }, 1);
-              }
-
-              $scope.ngModel = $element.find('.mq').mathquill('latex');
-            };
-          }
-
-          function init() {
-            log('Math input init...');
-            $scope.showKeypad = false;
-            $scope.focusedInput = null;
-
-            var $node = initDom($element, $attrs);
-            $element.html($node);
-            $compile($node)($scope);
-
-            initMethods();
-          }
-
-          init();
-        };
-      }
-
-      return MathInputDefinition;
-    }
-  ]);
-
-angular.module('corespring.math-input')
-  .directive('mathInput', [
-    'MathInputDef',
-    function(Def) {
-
+      var MQ = MathQuill.getInterface(2);
       function template() {
         return [
           '<div class="math-input">',
-          '  <div class="input" ng-class="{ \'dotted\': dotted }">',
+          '  <div class="input" ng-hide="code">',
           '    <span class="mq"></span>',
           '  </div>',
-          '  <keypad ng-show="showKeypad" keypad-type="keypadType" show-keypad="showKeypad" on-click-callback="clickButton(action)"></keypad>',
+          '  <div class="renderFromCode" ng-show="code" ng-click="openCodepad()"><span class="mjax"></span></div>',
+          '  <keypad ng-if="showKeypad" keypad-type="keypadType" on-click-callback="clickButton(action)" show-codepad-callback="showCodepadCallback()" show-code-button="{{showCodeButton}}"></keypad>',
+          '  <codepad ng-if="showCodepad" code-model="$parent.code" back-to-keypad="openKeypad()"></codepad>',
           '</div>'
-
         ].join('\n');
       }
 
-      var def = new Def(template);
+      var link = function($scope, $element, $attrs) {
+        new MathInputConfig().postLink($scope);
+        $scope.showCodepad = false;
+        $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
+
+        function onInputFieldClick() {
+          $scope.showKeypad = $scope.editable === 'true' && _.isEmpty($scope.code);
+          $scope.showCodepad = $scope.editable === 'true' && !_.isEmpty($scope.code);
+          $scope.focusedInput = $(this);
+          attachClickOutsideListener();
+          $scope.$apply();
+        }
+
+        function isMathML(text) {
+          return /\s*?<math.*?>/.test(text);
+        }
+
+        function isMathquillCompatible(text) {
+          if (isMathML(text)) {
+            return false;
+          }
+          if (text.match(/\$/)) {
+            return false;
+          }
+          var supportedTags = ['aleph', 'alpha', 'amalg', 'angle', 'approx', 'arccos', 'arcsin', 'arctan', 'ast',
+            'asymp', 'backslash', 'beta', 'bigcirc', 'bigtriangledown', 'bigtriangleup', 'bot', 'bowtie', 'bullet',
+            'cap', 'cdot', 'cdots', 'chi', 'circ', 'clubsuit', 'cong', 'cos', 'cosh', 'cot', 'coth', 'csc', 'cup',
+            'dagger', 'dashv', 'ddagger', 'ddots', 'deg', 'delta', 'det', 'diamond', 'diamondsuit', 'dim', 'div',
+            'doteq', 'dots', 'downarrow', 'ell', 'emptyset', 'epsilon', 'eq', 'equiv', 'eta', 'exists', 'flat',
+            'forall', 'frac', 'frown', 'gamma', 'gcd', 'ge', 'geq', 'gg', 'gt', 'hbar', 'heartsuit', 'hookleftarrow',
+            'hookrightarrow', 'Im', 'in', 'inf', 'infty', 'kappa', 'lambda', 'ldots', 'left', 'leftarrow', 'leftharpoondown',
+            'leftharpoonup', 'leftrightarrow', 'le', 'leq', 'lg', 'll', 'ln', 'log', 'log_b', 'longleftarrow', 'longleftrightarrow',
+            'longrightarrow', 'lt', 'mapsto', 'max', 'mid', 'min', 'models', 'mp', 'mu', 'nabla', 'natural', 'nearrow', 'qqqne',
+            'neg', 'neq', 'ni', 'nu', 'nwarrow', 'odot', 'omega', 'ominus', 'oplus', 'oslash', 'otimes', 'overline', 'parallel',
+            'partial', 'perp', 'phi', 'pi', 'pm', 'prec', 'preceq', 'prime', 'propto', 'psi', 'Re', 'rho', 'right', 'rightarrow',
+            'rightharpoondown', 'rightharpoonup', 'searrow', 'sec', 'setminus', 'sharp', 'sigma', 'sim', 'simeq', 'sin', 'sinh',
+            'smile', 'spadesuit', 'sqcap', 'sqcup', 'sqrt', 'sqsubseteq', 'sqsupseteq', 'star', 'subset', 'subseteq', 'succ',
+            'succeq', 'sup', 'supset', 'supseteq', 'surd', 'swarrow', 'tan', 'tanh', 'tau', 'text', 'theta', 'times', 'top',
+            'triangle', 'triangleleft', 'triangleright', 'uparrow', 'updownarrow', 'uplus', 'upsilon', 'varepsilon',
+            'varnothing', 'varphi', 'varpi', 'varrho', 'varsigma', 'vartheta', 'vdash', 'vdots', 'vee', 'wedge', 'wp', 'wr', 'xi',
+            'zeta'];
+          var matches = text.match(/\\{|\\}|\\[a-zA-Z;:#,]+/g);
+          if (!matches) {
+            return true;
+          }
+          for (var i = 0; i < matches.length; i++) {
+            var m = matches[i].substring(1);
+            var ix = supportedTags.indexOf(m.toLowerCase());
+            if (ix == -1) return false;
+          }
+          return true;
+        }
+
+        function fixBackslashes(expression) {
+          return ($scope.fixBackslash === 'true' || $scope.fixBackslash === undefined) ? (_.isString(expression) &&  expression.replace(/\\/g, '\\\\')) : expression;
+        }
+
+        function attachClickOutsideListener() {
+          
+          if (!$scope.clickOutsideListenerAttached) {
+            $document.on('mousedown', function(event) {
+              var isInMathInput = $.contains($element[0], event.target);
+              if (!isInMathInput) {
+                $scope.$apply(function() {
+                  $scope.showKeypad = false;
+                  $scope.showCodepad = false;
+                });
+                $document.off('mousedown');
+                $scope.clickOutsideListenerAttached = false;
+              }
+            });
+            $scope.clickOutsideListenerAttached = true;
+          }
+        }
+
+        function repositionElement(el, referenceElement) {
+          var elementWidth = el.width() + 20;
+          var playerElement = $element.parents($scope.parentSelectorCalculated);
+
+          if (!playerElement || !playerElement.offset() || elementWidth === 0) {
+            return;
+          }
+
+          var playerElementLeft = playerElement.offset().left;
+
+          var mqOffset = referenceElement.offset();
+          var currentOffset = {left: mqOffset.left};
+
+          if (currentOffset.left + elementWidth > playerElementLeft + playerElement.width()) {
+            currentOffset.left = playerElementLeft + playerElement.width() - elementWidth;
+          }
+          currentOffset.top = mqOffset.top + referenceElement.outerHeight() + 5;
+          el.offset(currentOffset);
+
+        }
+
+        function repositionKeypad() {
+          repositionElement($element.find('.keypad'), $element.find('.mq'));
+        }
+
+        function repositionCodepad() {
+          var refElem = _.isEmpty($scope.code) ? $element.find('.mq') : $element.find('.renderFromCode');
+          repositionElement($element.find('.codepad'),refElem );
+        }
+
+        function onInputChange(skipApply) {
+          if (!$scope.showKeypad) {
+            return;
+          }
+          var latex = $scope.mqField.latex();
+          $scope.ngModel = fixBackslashes(latex);
+          if (!skipApply) {
+            $scope.$apply();
+          }
+          repositionKeypad();
+        }
+
+        function initMethods() {
+          var mqElement = $element.find('.mq');
+          $element.click(onInputFieldClick);
+          $element.bind('input propertychange', onInputChange);
+          $element.bind('keypress', function(ev) {
+            if (ev.key.length === 1 && !ev.metaKey) {
+              $scope.mqField.typedText(ev.key);
+              onInputChange();
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+          });
+          
+          $scope.mqField = $scope.editable === 'true' ? MQ.MathField(mqElement[0]) : MQ.StaticMath(mqElement[0]);
+          var expr;
+          if ($scope.expressionEncoded) {
+            expr = atob($scope.expressionEncoded);
+          } else {
+            expr = $scope.expression;
+          }
+
+          if (expr && isMathquillCompatible(expr)) {
+            $scope.mqField.latex(expr);
+            $scope.ngModel = fixBackslashes(expr);
+            mqElement.blur();
+          } else if (expr) {
+            $scope.code = expr;
+          } else {
+            $scope.ngModel = '';
+          }
+
+
+          $scope.showCodepadCallback = function() {
+            $scope.showKeypad = false;
+            $scope.showCodepad = true;
+          };
+
+          $scope.openCodepad = function() {
+            $scope.showCodepad = true;
+            attachClickOutsideListener();
+          };
+
+          $scope.openKeypad = function() {
+            if (!$scope.focusedInput) {
+              $scope.focusedInput = mqElement;
+            }
+            $scope.codeModel = $scope.code = undefined;
+            $scope.showCodepad = false;
+            $scope.showKeypad = true;
+            attachClickOutsideListener();
+            var savedModel = $scope.ngModel;
+            $scope.ngModel = '';
+            $timeout(function() {
+              $scope.ngModel = savedModel;
+            });
+          };
+
+          $scope.clickButton = function(action) {
+            var button = $scope.buttons[action];
+            if (button.logic === 'clear') {
+              $scope.mqField.latex('');
+            } else if (button.logic === 'cursor') {
+              $scope.mqField.keystroke(button.command);  
+            } else if (button.logic === 'cmd' || button.logic === 'write') {
+              $scope.mqField[button.logic](button.command);
+            }
+
+            onInputChange(true);
+          };
+
+          $scope.$watch('showKeypad', function(n) {
+            if (n) {
+              setTimeout(function() {
+                repositionKeypad();
+              }, 1);
+            }
+          });
+
+          $scope.$watch('showCodepad', function(n) {
+            if (n) {
+              setTimeout(function() {
+                repositionCodepad();
+              }, 1);
+            }
+          });
+
+          $scope.$watch('code', function(n) {
+            $scope.codeModel = n;
+            if (isMathML(n)) {
+              $element.find('.mjax').html(n);
+            } else {
+              $element.find('.mjax').html('\\(' + n + '\\)');
+            }
+          });
+
+          $timeout(function() {
+            if ($scope.keypadAutoOpen === 'true') {
+              onInputFieldClick.apply($element.find('.mq'));
+              $scope.focusedInput.find('textarea').focus();
+            }
+          });
+        }
+
+        function init() {
+          $scope.showKeypad = false;
+          $scope.focusedInput = null;
+          $timeout(initMethods, 10);
+        }
+
+        init();
+      };
 
       return {
         restrict: 'E',
-        link: def.link,
+        link: link,
+        template: template(),
         replace: true,
         scope: {
           expression: '=',
-          dotted: '=',
+          expressionEncoded: '@',
           editable: '@',
           keypadType: '=',
-          ngModel: '='
+          keypadAutoOpen: '@',
+          ngModel: '=',
+          codeModel: '=',
+          parentSelector: '@',
+          fixBackslash: '@',
+          showCodeButton: '@'
         }
       };
     }
@@ -265,14 +423,14 @@ angular.module('corespring.math-input')
     function($sce) {
 
       var buttons = {};
-      // Cursor section
+      // Clear section
       buttons.ac = { id: 'ac', name: 'AC', symbol: $sce.trustAsHtml('AC'), logic: 'clear', command: 'clear', shortcut: '', cssClass: 'cursor' };
-
-      buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'moveLeft', shortcut: '', cssClass: 'cursor' };
-      buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'moveRight', shortcut: '', cssClass: 'cursor' };
-      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'moveUp', shortcut: '', cssClass: 'cursor' };
-      buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'moveDown', shortcut: '', cssClass: 'cursor' };
-      buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'backspace', shortcut: '', cssClass: 'backspace' };
+      // Cursor section
+      buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'Left', shortcut: '', cssClass: 'cursor' };
+      buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'Right', shortcut: '', cssClass: 'cursor' };
+      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'Up', shortcut: '', cssClass: 'cursor' };
+      buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'Down', shortcut: '', cssClass: 'cursor' };
+      buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'Backspace', shortcut: '', cssClass: 'backspace' };
       // Numeric section
       buttons.one = { id: 'one', name: 'One', symbol: $sce.trustAsHtml('1'), logic: 'write', command: '1', shortcut: '', cssClass: 'number' };
       buttons.two = { id: 'two', name: 'Two', symbol: $sce.trustAsHtml('2'), logic: 'cmd', command: '2', shortcut: '', cssClass: 'number' };
@@ -428,15 +586,10 @@ angular.module('corespring.math-input')
           'percentage': '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58"><style>.st0-135{fill:#b6e2ef;stroke:#60564b}.st0-135,.st1-135{stroke-miterlimit:10}.st1-135{fill:#464146;stroke:#464146;stroke-width:.5}</style><path class="st0-135" d="M52.7 55.7H5.3c-1.7 0-3-1.3-3-3V5.3c0-1.7 1.3-3 3-3h47.5c1.7 0 3 1.3 3 3v47.5c-.1 1.6-1.4 2.9-3.1 2.9z"/><path class="st1-135" d="M20.7 18.5c.8 0 1.6.1 2.2.4s1.2.7 1.6 1.2.8 1.2 1 1.9.3 1.6.3 2.6c0 2-.5 3.6-1.4 4.6-.9 1.1-2.2 1.6-3.9 1.6-1.7 0-3-.5-3.9-1.6-.9-1.1-1.4-2.6-1.4-4.6 0-2 .5-3.5 1.4-4.6s2.4-1.5 4.1-1.5zm-.1 1.3c-2 0-2.9 1.7-2.9 5 0 1.6.2 2.8.7 3.7s1.2 1.2 2.2 1.2c1 0 1.7-.4 2.2-1.2s.8-2 .8-3.7c0-1.7-.3-2.9-.8-3.7s-1.1-1.3-2.2-1.3zm17.3-1.1L22.1 41.9h-1.9L36 18.7h1.9zm-.4 10.9c1.7 0 3 .5 3.9 1.6s1.3 2.6 1.3 4.7c0 1.9-.5 3.4-1.4 4.5S39.1 42 37.4 42c-1.7 0-3-.5-3.9-1.6s-1.4-2.6-1.4-4.6c0-2 .5-3.5 1.4-4.6s2.3-1.6 4-1.6zm-.1 1.3c-1 0-1.7.4-2.2 1.3s-.7 2.1-.7 3.7.3 2.8.8 3.6 1.3 1.2 2.2 1.2 1.8-.4 2.3-1.2.8-2 .8-3.6c0-1.7-.3-3-.8-3.8s-1.3-1.2-2.4-1.2z"/></svg>',
           'x': '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58"><style>.st0-136{fill:#b6e2ef;stroke:#60564b}.st0-136,.st1-136{stroke-miterlimit:10}.st1-136{fill:#464146;stroke:#464146;stroke-width:.5}</style><path class="st0-136" d="M52.7 55.7H5.3c-1.7 0-3-1.3-3-3V5.3c0-1.7 1.3-3 3-3h47.5c1.7 0 3 1.3 3 3v47.5c-.1 1.6-1.4 2.9-3.1 2.9z"/><path class="st1-136" d="M23.1 30.3c.9-2.2 2.5-5.5 5.3-5.5 2.4 0 2.9 2.4 3.4 4.3.9-1.4 2.5-4.3 4.4-4.3 1.2 0 2.1.7 2.1 1.9 0 1.3-.8 2-2 2-.4 0-.8-.2-1.2-.4-.4-.2-.6-.4-.8-.4-.9.1-2.3 2.2-2.2 2.8l1.2 5.4c.2.9.3 1.7 1 1.7.8 0 2.3-2.8 2.6-3.6l.8.3c-.9 2.3-2.6 5.3-5.4 5.3-3 0-3.5-3.1-4-5.4-1.2 2-2.4 5.4-5.3 5.4-1.3 0-1.9-1.1-1.9-2.3 0-1 .9-1.9 1.9-1.9.7 0 1.3.4 1.7.6.3.1.6.4.7.4.5 0 2.2-2.1 2.6-3.3l-1.3-5.7c0-.1-.2-.4-.4-.4-1 0-2.1 2.7-2.5 3.4l-.7-.3z"/></svg>',
           'y': '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58"><style>.st0-137{fill:#b6e2ef;stroke:#60564b}.st0-137,.st1-137{stroke-miterlimit:10}.st1-137{fill:#464146;stroke:#464146;stroke-width:.5}</style><path class="st0-137" d="M52.7 55.7H5.3c-1.7 0-3-1.3-3-3V5.3c0-1.7 1.3-3 3-3h47.5c1.7 0 3 1.3 3 3v47.5c-.1 1.6-1.4 2.9-3.1 2.9z"/><path class="st1-137" d="M31.2 34.3l2.4-6.6c.4-1.1.9-2.9 2.4-2.9 1 0 1.7.8 1.7 1.8 0 .9-.4 2-1.5 2-.3 0-.7-.3-1-.3-.6-.1-.9 1-1.1 1.4l-3.7 9.6c-1.2 3-3.5 7.7-7.2 7.7-1.4 0-2.6-1-2.6-2.4 0-1.2.8-2.2 2.1-2.2 1.2 0 2.2.8 1.9 1.9-.1.6.2.8.6.8.8 0 3-3 3.1-3.8.1-.3.1-.6.1-.9 0-.6-.3-1.3-.5-1.9l-3-8.7c-.2-.5-.5-2.2-1.2-2.2-.8 0-1.9 2.2-2.2 2.8l-.8-.3c.8-2 2.8-5.3 5.2-5.3 1.2 0 2.6.1 3.3 2.8l2 6.7z"/></svg>'
-
-
         }).mapValues(function(v) { return $sce.trustAsHtml(v); }).value()
       };
 
-
-
       function MathInputConfig() {
-
         this.postLink = function(scope) {
           scope.types = types;
           scope.sections = sections;

@@ -7,7 +7,7 @@ angular.module('corespring.math-input')
     '$timeout',
     function(MathInputConfig, $log, $compile, $document, $timeout) {
       var log = $log.debug.bind($log, '[math-input-def]');
-
+      var MQ = MathQuill.getInterface(2);
       function template() {
         return [
           '<div class="math-input">',
@@ -27,7 +27,6 @@ angular.module('corespring.math-input')
         $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
 
         function onInputFieldClick() {
-          $($document).trigger('mousedown');
           $scope.showKeypad = $scope.editable === 'true' && _.isEmpty($scope.code);
           $scope.showCodepad = $scope.editable === 'true' && !_.isEmpty($scope.code);
           $scope.focusedInput = $(this);
@@ -80,14 +79,18 @@ angular.module('corespring.math-input')
         }
 
         function attachClickOutsideListener() {
+          
           if (!$scope.clickOutsideListenerAttached) {
             $document.on('mousedown', function(event) {
-              $scope.$apply(function() {
-                $scope.showKeypad = false;
-                $scope.showCodepad = false;
-              });
-              $document.off('mousedown');
-              $scope.clickOutsideListenerAttached = false;
+              var isInMathInput = $.contains($element[0], event.target);
+              if (!isInMathInput) {
+                $scope.$apply(function() {
+                  $scope.showKeypad = false;
+                  $scope.showCodepad = false;
+                });
+                $document.off('mousedown');
+                $scope.clickOutsideListenerAttached = false;
+              }
             });
             $scope.clickOutsideListenerAttached = true;
           }
@@ -127,7 +130,7 @@ angular.module('corespring.math-input')
           if (!$scope.showKeypad) {
             return;
           }
-          var latex = $element.find('.mq').mathquill('latex');
+          var latex = $scope.mqField.latex();
           $scope.ngModel = fixBackslashes(latex);
           if (!skipApply) {
             $scope.$apply();
@@ -137,16 +140,18 @@ angular.module('corespring.math-input')
 
         function initMethods() {
           var mqElement = $element.find('.mq');
-          mqElement.click(onInputFieldClick);
+          $element.click(onInputFieldClick);
           $element.bind('input propertychange', onInputChange);
-          $element.bind('keyup', function(ev) {
-            // input propertychange does not fire for backspace, need to handle separately
-            if (ev.keyCode === 8) {
+          $element.bind('keypress', function(ev) {
+            if (ev.key.length === 1 && !ev.metaKey) {
+              $scope.mqField.typedText(ev.key);
               onInputChange();
             }
+            ev.preventDefault();
+            ev.stopPropagation();
           });
-
-          mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
+          
+          $scope.mqField = $scope.editable === 'true' ? MQ.MathField(mqElement[0]) : MQ.StaticMath(mqElement[0]);
           var expr;
           if ($scope.expressionEncoded) {
             expr = atob($scope.expressionEncoded);
@@ -154,9 +159,8 @@ angular.module('corespring.math-input')
             expr = $scope.expression;
           }
 
-          console.log("boomat", expr);
           if (expr && isMathquillCompatible(expr)) {
-            mqElement.mathquill('latex', expr);
+            $scope.mqField.latex(expr);
             $scope.ngModel = fixBackslashes(expr);
             mqElement.blur();
           } else if (expr) {
@@ -194,16 +198,11 @@ angular.module('corespring.math-input')
           $scope.clickButton = function(action) {
             var button = $scope.buttons[action];
             if (button.logic === 'clear') {
-              $scope.focusedInput.mathquill('latex', '');
-              $timeout(function() {
-                $scope.focusedInput.find('textarea').focus();
-              }, 1);
-
-            } else if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
-              $scope.focusedInput.mathquill(button.logic, button.command);
-              $timeout(function() {
-                $scope.focusedInput.find('textarea').focus();
-              }, 1);
+              $scope.mqField.latex('');
+            } else if (button.logic === 'cursor') {
+              $scope.mqField.keystroke(button.command);  
+            } else if (button.logic === 'cmd' || button.logic === 'write') {
+              $scope.mqField[button.logic](button.command);
             }
 
             onInputChange(true);
