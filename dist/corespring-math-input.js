@@ -1,4 +1,4 @@
-/*! corespring-math-input - v0.0.8 - 2016-06-09
+/*! corespring-math-input - v0.0.9 - 2016-08-23
 * Copyright (c) 2016 CoreSpring; Licensed MIT */
 angular.module('corespring.math-input', []);
 
@@ -154,7 +154,7 @@ angular.module('corespring.math-input')
     '$timeout',
     function(MathInputConfig, $log, $compile, $document, $timeout) {
       var log = $log.debug.bind($log, '[math-input-def]');
-
+      var MQ = MathQuill.getInterface(2);
       function template() {
         return [
           '<div class="math-input">',
@@ -174,7 +174,6 @@ angular.module('corespring.math-input')
         $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
 
         function onInputFieldClick() {
-          $($document).trigger('mousedown');
           $scope.showKeypad = $scope.editable === 'true' && _.isEmpty($scope.code);
           $scope.showCodepad = $scope.editable === 'true' && !_.isEmpty($scope.code);
           $scope.focusedInput = $(this);
@@ -229,14 +228,18 @@ angular.module('corespring.math-input')
         }
 
         function attachClickOutsideListener() {
+          
           if (!$scope.clickOutsideListenerAttached) {
             $document.on('mousedown', function(event) {
-              $scope.$apply(function() {
-                $scope.showKeypad = false;
-                $scope.showCodepad = false;
-              });
-              $document.off('mousedown');
-              $scope.clickOutsideListenerAttached = false;
+              var isInMathInput = $.contains($element[0], event.target);
+              if (!isInMathInput) {
+                $scope.$apply(function() {
+                  $scope.showKeypad = false;
+                  $scope.showCodepad = false;
+                });
+                $document.off('mousedown');
+                $scope.clickOutsideListenerAttached = false;
+              }
             });
             $scope.clickOutsideListenerAttached = true;
           }
@@ -276,7 +279,7 @@ angular.module('corespring.math-input')
           if (!$scope.showKeypad) {
             return;
           }
-          var latex = $element.find('.mq').mathquill('latex');
+          var latex = $scope.mqField.latex();
           $scope.ngModel = fixBackslashes(latex);
           if (!skipApply) {
             $scope.$apply();
@@ -286,16 +289,18 @@ angular.module('corespring.math-input')
 
         function initMethods() {
           var mqElement = $element.find('.mq');
-          mqElement.click(onInputFieldClick);
+          $element.click(onInputFieldClick);
           $element.bind('input propertychange', onInputChange);
-          $element.bind('keyup', function(ev) {
-            // input propertychange does not fire for backspace, need to handle separately
-            if (ev.keyCode === 8) {
+          $element.bind('keypress', function(ev) {
+            if (ev.key.length === 1 && !ev.metaKey) {
+              $scope.mqField.typedText(ev.key);
               onInputChange();
             }
+            ev.preventDefault();
+            ev.stopPropagation();
           });
-
-          mqElement.mathquill($scope.editable === 'true' ? 'editable' : undefined);
+          
+          $scope.mqField = $scope.editable === 'true' ? MQ.MathField(mqElement[0]) : MQ.StaticMath(mqElement[0]);
           var expr;
           if ($scope.expressionEncoded) {
             expr = atob($scope.expressionEncoded);
@@ -304,7 +309,7 @@ angular.module('corespring.math-input')
           }
 
           if (expr && isMathquillCompatible(expr)) {
-            mqElement.mathquill('latex', expr);
+            $scope.mqField.latex(expr);
             $scope.ngModel = fixBackslashes(expr);
             mqElement.blur();
           } else if (expr) {
@@ -342,16 +347,11 @@ angular.module('corespring.math-input')
           $scope.clickButton = function(action) {
             var button = $scope.buttons[action];
             if (button.logic === 'clear') {
-              $scope.focusedInput.mathquill('latex', '');
-              $timeout(function() {
-                $scope.focusedInput.find('textarea').focus();
-              }, 1);
-
-            } else if (button.logic === 'cursor' || button.logic === 'cmd' || button.logic === 'write') {
-              $scope.focusedInput.mathquill(button.logic, button.command);
-              $timeout(function() {
-                $scope.focusedInput.find('textarea').focus();
-              }, 1);
+              $scope.mqField.latex('');
+            } else if (button.logic === 'cursor') {
+              $scope.mqField.keystroke(button.command);  
+            } else if (button.logic === 'cmd' || button.logic === 'write') {
+              $scope.mqField[button.logic](button.command);
             }
 
             onInputChange(true);
@@ -428,11 +428,11 @@ angular.module('corespring.math-input')
       // Clear section
       buttons.ac = { id: 'ac', name: 'AC', symbol: $sce.trustAsHtml('AC'), logic: 'clear', command: 'clear', shortcut: '', cssClass: 'cursor' };
       // Cursor section
-      buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'moveLeft', shortcut: '', cssClass: 'cursor' };
-      buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'moveRight', shortcut: '', cssClass: 'cursor' };
-      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'moveUp', shortcut: '', cssClass: 'cursor' };
-      buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'moveDown', shortcut: '', cssClass: 'cursor' };
-      buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'backspace', shortcut: '', cssClass: 'backspace' };
+      buttons.left = { id: 'left', name: 'Move left', symbol: $sce.trustAsHtml('&larr;'), logic: 'cursor', command: 'Left', shortcut: '', cssClass: 'cursor' };
+      buttons.right = { id: 'right', name: 'Move right', symbol: $sce.trustAsHtml('&rarr;'), logic: 'cursor', command: 'Right', shortcut: '', cssClass: 'cursor' };
+      buttons.up = { id: 'up', name: 'Move up', symbol: $sce.trustAsHtml('&uarr;'), logic: 'cursor', command: 'Up', shortcut: '', cssClass: 'cursor' };
+      buttons.down = { id: 'down', name: 'Move down', symbol: $sce.trustAsHtml('&darr;'), logic: 'cursor', command: 'Down', shortcut: '', cssClass: 'cursor' };
+      buttons.backspace = { id: 'backspace', name: 'Backspace', symbol: $sce.trustAsHtml('&LeftArrowBar;'), logic: 'cursor', command: 'Backspace', shortcut: '', cssClass: 'backspace' };
       // Numeric section
       buttons.one = { id: 'one', name: 'One', symbol: $sce.trustAsHtml('1'), logic: 'write', command: '1', shortcut: '', cssClass: 'number' };
       buttons.two = { id: 'two', name: 'Two', symbol: $sce.trustAsHtml('2'), logic: 'cmd', command: '2', shortcut: '', cssClass: 'number' };
