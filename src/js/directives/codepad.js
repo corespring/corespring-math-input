@@ -7,7 +7,7 @@ angular.module('corespring.math-input')
         return [
           '<div class="codepad" ng-mousedown="cancelEvent($event)">',
           '  <div>',
-          '    <textarea class="code-input" placeholder="Enter MathML or LaTeX code here" ng-mousedown="cancelEvent($event)" ng-click="inputClick($event)" ng-model="codeModel" />',
+          '    <textarea class="code-input" placeholder="Enter MathML or LaTeX code here" ng-model="codeModel" />',
           '  </div>',
           '  <div class="code-button" ng-class="{disabled: codeModel.length > 0}" ng-mousedown="cancelEvent($event)" ng-click="codeButtonClick()"><i class="fa fa-code"></i></div>',
           '</div>'

@@ -145,12 +145,14 @@ angular.module('corespring.math-input')
           $element.click(onInputFieldClick);
           $element.bind('input propertychange', onInputChange);
           $element.bind('keypress', function(ev) {
+            if ($(ev.target).hasClass('code-input')) {
+              return;
+            }
             if (ev.key.length === 1 && !ev.metaKey) {
               $scope.mqField.typedText(ev.key);
               onInputChange();
             }
             ev.preventDefault();
-            ev.stopPropagation();
           });
           
           $scope.mqField = $scope.editable === 'true' ? MQ.MathField(mqElement[0]) : MQ.StaticMath(mqElement[0]);
