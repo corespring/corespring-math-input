@@ -19,7 +19,7 @@ angular.module('corespring.math-input')
           '    </div>',
           '  </div>',
           '  <div ng-show="showCodeButton == \'true\'">',
-          '    <div class="code-button" ng-mousedown="cancel($event)" ng-click="showCodepadCallback()"><i class="fa fa-code"></i></div>',
+          '    <div class="code-button" ng-mousedown="cancel($event)" ng-click="codeButtonClick($event)"><i class="fa fa-code"></i></div>',
           '  </div>',
           '</div>'
         ].join('\n');
@@ -30,6 +30,11 @@ angular.module('corespring.math-input')
         $scope.cancel = function(ev) {
           ev.stopPropagation();
           ev.preventDefault();
+        };
+
+        $scope.codeButtonClick = function(ev) {
+          $scope.cancel(ev);
+          $scope.showCodepadCallback();
         };
 
         $scope.onClick = function(button) {
