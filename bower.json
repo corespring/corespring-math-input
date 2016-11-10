@@ -18,7 +18,7 @@
   "dependencies": {
     "angular": "~1.2.12",
     "jquery": "~1.11.0",
-    "mathquill-build": "https://github.com/corespring/mathquill/tree/mathquill-build-0.11.1-draccoz",
+    "mathquill-build": "git@github.com:corespring/mathquill#mathquill-build-0.11.1-draccoz",
     "lodash": "~2.4.1"
   },
   "devDependencies": {
