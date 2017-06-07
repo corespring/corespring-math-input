@@ -4,6 +4,9 @@
   "version": "0.0.1",
   "description": "Angular math enabled input",
   "license": "MIT",
+  "engines": {
+    "node": "v5.6.0"
+  },
   "devDependencies": {
     "bower": "^1.7.0",
     "express": "^4.13.3",

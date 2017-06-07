@@ -1,5 +1,5 @@
-/*! corespring-math-input - v0.0.1 - 2016-08-23
-* Copyright (c) 2016 CoreSpring; Licensed MIT */
+/*! corespring-math-input - v0.0.1 - 2017-06-07
+* Copyright (c) 2017 CoreSpring; Licensed MIT */
 angular.module('corespring.math-input', []);
 
 angular.module('corespring.math-input')
@@ -11,7 +11,7 @@ angular.module('corespring.math-input')
         return [
           '<div class="codepad" ng-mousedown="cancelEvent($event)">',
           '  <div>',
-          '    <textarea class="code-input" placeholder="Enter MathML or LaTeX code here" ng-mousedown="cancelEvent($event)" ng-click="inputClick($event)" ng-model="codeModel" />',
+          '    <textarea class="code-input" placeholder="Enter MathML or LaTeX code here" ng-model="codeModel" />',
           '  </div>',
           '  <div class="code-button" ng-class="{disabled: codeModel.length > 0}" ng-mousedown="cancelEvent($event)" ng-click="codeButtonClick()"><i class="fa fa-code"></i></div>',
           '</div>'
@@ -110,7 +110,7 @@ angular.module('corespring.math-input')
           '    </div>',
           '  </div>',
           '  <div ng-show="showCodeButton == \'true\'">',
-          '    <div class="code-button" ng-mousedown="cancel($event)" ng-click="showCodepadCallback()"><i class="fa fa-code"></i></div>',
+          '    <div class="code-button" ng-mousedown="cancel($event)" ng-click="codeButtonClick($event)"><i class="fa fa-code"></i></div>',
           '  </div>',
           '</div>'
         ].join('\n');
@@ -121,6 +121,11 @@ angular.module('corespring.math-input')
         $scope.cancel = function(ev) {
           ev.stopPropagation();
           ev.preventDefault();
+        };
+
+        $scope.codeButtonClick = function(ev) {
+          $scope.cancel(ev);
+          $scope.showCodepadCallback();
         };
 
         $scope.onClick = function(button) {
@@ -290,12 +295,14 @@ angular.module('corespring.math-input')
           $element.click(onInputFieldClick);
           $element.bind('input propertychange', onInputChange);
           $element.bind('keypress', function(ev) {
+            if ($(ev.target).hasClass('code-input')) {
+              return;
+            }
             if (ev.key.length === 1 && !ev.metaKey) {
               $scope.mqField.typedText(ev.key);
               onInputChange();
             }
             ev.preventDefault();
-            ev.stopPropagation();
           });
           
           $scope.mqField = $scope.editable === 'true' ? MQ.MathField(mqElement[0]) : MQ.StaticMath(mqElement[0]);
