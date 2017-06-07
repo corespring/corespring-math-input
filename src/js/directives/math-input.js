@@ -5,7 +5,7 @@ angular.module('corespring.math-input')
     '$compile',
     '$document',
     '$timeout',
-    function(MathInputConfig, $log, $compile, $document, $timeout) {
+    function (MathInputConfig, $log, $compile, $document, $timeout) {
       var log = $log.debug.bind($log, '[math-input-def]');
       var MQ = MathQuill.getInterface(2);
       function template() {
@@ -21,7 +21,7 @@ angular.module('corespring.math-input')
         ].join('\n');
       }
 
-      var link = function($scope, $element, $attrs) {
+      var link = function ($scope, $element, $attrs) {
         new MathInputConfig().postLink($scope);
         $scope.showCodepad = false;
         $scope.parentSelectorCalculated = $scope.parentSelector || '.corespring-player';
@@ -75,16 +75,16 @@ angular.module('corespring.math-input')
         }
 
         function fixBackslashes(expression) {
-          return ($scope.fixBackslash === 'true' || $scope.fixBackslash === undefined) ? (_.isString(expression) &&  expression.replace(/\\/g, '\\\\')) : expression;
+          return ($scope.fixBackslash === 'true' || $scope.fixBackslash === undefined) ? (_.isString(expression) && expression.replace(/\\/g, '\\\\')) : expression;
         }
 
         function attachClickOutsideListener() {
-          
+
           if (!$scope.clickOutsideListenerAttached) {
-            $document.on('mousedown', function(event) {
+            $document.on('mousedown', function (event) {
               var isInMathInput = $.contains($element[0], event.target);
               if (!isInMathInput) {
-                $scope.$apply(function() {
+                $scope.$apply(function () {
                   $scope.showKeypad = false;
                   $scope.showCodepad = false;
                 });
@@ -107,7 +107,7 @@ angular.module('corespring.math-input')
           var playerElementLeft = playerElement.offset().left;
 
           var mqOffset = referenceElement.offset();
-          var currentOffset = {left: mqOffset.left};
+          var currentOffset = { left: mqOffset.left };
 
           if (currentOffset.left + elementWidth > playerElementLeft + playerElement.width()) {
             currentOffset.left = playerElementLeft + playerElement.width() - elementWidth;
@@ -123,7 +123,7 @@ angular.module('corespring.math-input')
 
         function repositionCodepad() {
           var refElem = _.isEmpty($scope.code) ? $element.find('.mq') : $element.find('.renderFromCode');
-          repositionElement($element.find('.codepad'),refElem );
+          repositionElement($element.find('.codepad'), refElem);
         }
 
         function onInputChange(skipApply) {
@@ -142,7 +142,14 @@ angular.module('corespring.math-input')
           var mqElement = $element.find('.mq');
           $element.click(onInputFieldClick);
           $element.bind('input propertychange', onInputChange);
-          $element.bind('keypress', function(ev) {
+
+          //Prevent containing elements from receiving the keyup event.
+          $element.bind('keyup', function (ev) {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+          });
+
+          $element.bind('keypress', function (ev) {
             if ($(ev.target).hasClass('code-input')) {
               return;
             }
@@ -152,7 +159,7 @@ angular.module('corespring.math-input')
             }
             ev.preventDefault();
           });
-          
+
           $scope.mqField = $scope.editable === 'true' ? MQ.MathField(mqElement[0]) : MQ.StaticMath(mqElement[0]);
           var expr;
           if ($scope.expressionEncoded) {
@@ -172,17 +179,17 @@ angular.module('corespring.math-input')
           }
 
 
-          $scope.showCodepadCallback = function() {
+          $scope.showCodepadCallback = function () {
             $scope.showKeypad = false;
             $scope.showCodepad = true;
           };
 
-          $scope.openCodepad = function() {
+          $scope.openCodepad = function () {
             $scope.showCodepad = true;
             attachClickOutsideListener();
           };
 
-          $scope.openKeypad = function() {
+          $scope.openKeypad = function () {
             if (!$scope.focusedInput) {
               $scope.focusedInput = mqElement;
             }
@@ -192,17 +199,17 @@ angular.module('corespring.math-input')
             attachClickOutsideListener();
             var savedModel = $scope.ngModel;
             $scope.ngModel = '';
-            $timeout(function() {
+            $timeout(function () {
               $scope.ngModel = savedModel;
             });
           };
 
-          $scope.clickButton = function(action) {
+          $scope.clickButton = function (action) {
             var button = $scope.buttons[action];
             if (button.logic === 'clear') {
               $scope.mqField.latex('');
             } else if (button.logic === 'cursor') {
-              $scope.mqField.keystroke(button.command);  
+              $scope.mqField.keystroke(button.command);
             } else if (button.logic === 'cmd' || button.logic === 'write') {
               $scope.mqField[button.logic](button.command);
             }
@@ -210,23 +217,23 @@ angular.module('corespring.math-input')
             onInputChange(true);
           };
 
-          $scope.$watch('showKeypad', function(n) {
+          $scope.$watch('showKeypad', function (n) {
             if (n) {
-              setTimeout(function() {
+              setTimeout(function () {
                 repositionKeypad();
               }, 1);
             }
           });
 
-          $scope.$watch('showCodepad', function(n) {
+          $scope.$watch('showCodepad', function (n) {
             if (n) {
-              setTimeout(function() {
+              setTimeout(function () {
                 repositionCodepad();
               }, 1);
             }
           });
 
-          $scope.$watch('code', function(n) {
+          $scope.$watch('code', function (n) {
             $scope.codeModel = n;
             if (isMathML(n)) {
               $element.find('.mjax').html(n);
@@ -235,7 +242,7 @@ angular.module('corespring.math-input')
             }
           });
 
-          $timeout(function() {
+          $timeout(function () {
             if ($scope.keypadAutoOpen === 'true') {
               onInputFieldClick.apply($element.find('.mq'));
               $scope.focusedInput.find('textarea').focus();

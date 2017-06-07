@@ -7,4 +7,13 @@ Uses mathquill.
 
 ## Running Example 
 
+```bash
 grunt run
+```
+
+
+## Test
+
+```bash
+grunt test
+```

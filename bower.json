@@ -1,5 +1,6 @@
 {
   "name": "corespring-math-input",
+  "version": "0.0.13",
   "description": "Angular math enabled input",
   "main": [
     "dist/corespring-math-input.js",
