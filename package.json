@@ -1,9 +1,12 @@
 {
   "name": "corespring-math-input",
   "author": "CoreSpring",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "Angular math enabled input",
   "license": "MIT",
+  "engines": {
+    "node": "v5.6.0"
+  },
   "devDependencies": {
     "bower": "^1.7.0",
     "express": "^4.13.3",
